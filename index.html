@@ -1,0 +1,2450 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>训记App分享体系竞品分析（聚焦“触发-物料-承接”闭环）</title>
+  <style>
+    :root{
+      /* 训记风格定义 - 优化对比度 */
+      --bg-body: #050505;
+      --bg-panel: #111111;
+      --bg-card: #1c1c1e;
+      --text-main: #ffffff;
+      --text-sub: #b0b0b0;
+      --text-muted: #666666;
+
+      --accent-primary: #0a84ff; /* iOS蓝 */
+      --accent-secondary: #5e5ce6; /* 深邃紫 */
+      --accent-success: #32d74b; /* 健身绿 */
+      --accent-danger: #ff453a;  /* 警告红 */
+      --accent-highlight: #64d2ff; /* 高亮青 */
+      --accent-orange: #ff9f0a;  /* 活力橙 */
+
+      --border: rgba(255,255,255,0.12);
+      --border-light: rgba(255,255,255,0.05);
+      --radius: 12px;
+      --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+      /* 动画变量 */
+      --ease-out-back: cubic-bezier(0.175, 0.885, 0.32, 0.175);
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      font-family:var(--font);
+      background: var(--bg-body);
+      color:var(--text-main);
+      line-height:1.75;
+      font-size: 15px;
+      scroll-behavior: smooth;
+    }
+
+    /* 布局容器 */
+    .layout {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 30px;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 40px;
+    }
+
+    /* 侧边导航 */
+    aside {
+      position: sticky;
+      top: 30px;
+      height: fit-content;
+      max-height: calc(100vh - 60px);
+      overflow-y: auto;
+      background: var(--bg-panel);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 24px 16px;
+      backdrop-filter: blur(20px);
+      z-index: 90;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    /* 侧边栏搜索框 */
+    .nav-search {
+      width: 100%;
+      padding: 10px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: #fff;
+      margin-bottom: 20px;
+      font-size: 13px;
+    }
+    .nav-search:focus { outline: 1px solid var(--accent-primary); border-color: var(--accent-primary); }
+
+    @media (max-width: 1024px) {
+      .layout { grid-template-columns: 1fr; padding: 15px; gap: 20px; }
+      aside { position: static !important; width: 100%; max-height: none; margin-bottom: 20px; padding: 15px; }
+      .nav-group-container { display: none; }
+      details { margin-bottom: 10px; background: var(--bg-card); border-radius: 8px; border: 1px solid var(--border); overflow: hidden; }
+      details summary { padding: 12px; font-weight: bold; cursor: pointer; list-style: none; color: var(--text-sub); background: rgba(255,255,255,0.02); }
+      details[open] summary { border-bottom: 1px solid var(--border); color: var(--accent-primary); }
+      details .nav-item { border-radius: 0; margin: 0; border-left: none; padding-left: 20px; }
+    }
+    @media (min-width: 1025px) {
+      .mobile-nav-root { display: none; }
+    }
+
+    .nav-group { margin-bottom: 24px; }
+    .nav-title {
+      font-size: 11px;
+      color: var(--accent-primary);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 10px;
+      padding-left: 12px;
+      font-weight: 800;
+      text-shadow: 0 0 10px rgba(10, 132, 255, 0.3);
+    }
+    .nav-item {
+      display: flex; align-items: center; padding: 10px 12px; color: var(--text-sub);
+      text-decoration: none; border-radius: 8px; margin-bottom: 2px; font-size: 13px;
+      transition: all 0.2s; border-left: 3px solid transparent;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.08); color: var(--text-main); transform: translateX(4px); }
+    .nav-item.active { background: rgba(10, 132, 255, 0.15); color: var(--accent-primary); border-left-color: var(--accent-primary); font-weight: 600; box-shadow: 0 0 15px rgba(10,132,255,0.1); }
+    .nav-item.hidden { display: none; }
+
+    /* 头部与声明 */
+    header { margin-bottom: 50px; border-bottom: 1px solid var(--border); padding-bottom: 30px; }
+    h1 {
+      margin: 0 0 16px; font-size: 32px; letter-spacing: -0.8px; font-weight: 800;
+      background: linear-gradient(to right, #fff, #aaa); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 30px rgba(255,255,255,0.1);
+    }
+
+    .project-declaration {
+      background: rgba(255, 159, 10, 0.1);
+      border: 1px solid rgba(255, 159, 10, 0.3);
+      color: #ffdbb0;
+      padding: 16px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+    .project-declaration strong { color: var(--accent-orange); }
+
+    .meta-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+    .tag { background: rgba(255,255,255,0.08); padding: 4px 12px; border-radius: 20px; color: var(--text-sub); font-size: 12px; border: 1px solid var(--border-light); }
+
+    /* 章节通用 */
+    section { margin-bottom: 80px; scroll-margin-top: 40px; position: relative; border-bottom: 1px dashed var(--border); padding-bottom: 60px; }
+    section:last-child { border-bottom: none; }
+    h2 { font-size: 24px; margin-bottom: 24px; color: var(--text-main); display: flex; align-items: center; gap: 12px; text-shadow: 0 0 20px rgba(0,0,0,0.5); }
+    h2::before { content: ''; width: 6px; height: 24px; background: var(--accent-primary); border-radius: 2px; box-shadow: 0 0 10px var(--accent-primary); }
+    h3 { font-size: 18px; margin: 32px 0 16px; color: var(--text-main); border-left: 3px solid var(--border); padding-left: 12px; }
+    /* 修复阅读体验：左对齐 */
+    p { color: #d4d4d8; margin-bottom: 20px; text-align: left; }
+
+    /* 四段式洞察卡 */
+    .four-part-card {
+      background: linear-gradient(145deg, #131313 0%, #0a0a0a 100%);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent-success);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin: 30px 0;
+      transition: transform 0.3s;
+    }
+    .four-part-card:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .fpc-title { font-size: 14px; font-weight: 700; color: var(--accent-success); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+    .fpc-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    .fpc-item { font-size: 13px; color: #ccc; }
+    .fpc-item strong { color: #fff; margin-right: 6px; }
+    .fpc-actions { margin-top: 8px; padding-left: 20px; color: #fff; list-style: none; }
+    .fpc-actions li { margin-bottom: 4px; }
+
+    /* 深度聚焦模块 */
+    .focus-module {
+      background: rgba(10, 132, 255, 0.05);
+      border: 1px solid rgba(10, 132, 255, 0.2);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin: 30px 0;
+    }
+    .focus-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+    .focus-icon { font-size: 24px; }
+    .focus-title { font-size: 16px; font-weight: 700; color: var(--accent-highlight); }
+    .focus-content { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .focus-box { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border: 1px solid var(--border-light); }
+    .focus-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .focus-text { font-size: 13px; color: #ddd; line-height: 1.6; }
+
+    /* 移动端自适应：单列布局 */
+    @media (max-width: 1024px) {
+        .focus-content { grid-template-columns: 1fr; }
+    }
+
+    /* 图片卡 / 图集（新增：用于插图稳定展示） */
+    .img-grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin: 18px 0;
+    }
+    .img-card{
+      border:1px solid var(--border);
+      border-radius:12px;
+      overflow:hidden;
+      background: rgba(0,0,0,0.25);
+    }
+    .img-card img{
+      width:100%;
+      display:block;
+    }
+    .img-caption{
+      padding: 10px 12px;
+      font-size: 12px;
+      color: var(--text-sub);
+      border-top: 1px solid var(--border-light);
+      background: rgba(0,0,0,0.35);
+      line-height: 1.5;
+    }
+
+    /* Mermaid Style Overrides */
+    .mermaid-block{
+      border:1px solid rgba(255,255,255,0.12);
+      border-radius:12px;
+      background:#111;
+      padding:14px;
+      margin-top:12px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      cursor: zoom-in;
+    }
+    /* P0 优化：让紧凑图默认一屏看全 */
+    .mermaid-fit .mermaid{ overflow: hidden !important; }
+    .mermaid-fit .mermaid svg{
+      width: 100% !important;
+      height: auto !important;
+      max-height: 520px; 
+      display: block;
+    }
+    .mermaid{
+      overflow: auto;
+      padding: 8px;
+      border-radius: 10px;
+      background: rgba(0,0,0,0.25);
+    }
+    .mermaid svg{
+      width: 100%;
+      height: auto;
+    }
+
+    /* ===== 表格样式 ===== */
+    .data-table-wrapper {
+      overflow-x: auto;
+      overflow-y: visible;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin: 24px 0;
+      position: relative;
+    }
+    .data-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; min-width: 900px; }
+    .data-table th, .data-table td { padding: 14px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; background: var(--bg-body); }
+
+    .data-table th {
+      background: var(--bg-panel);
+      color: var(--text-sub);
+      font-weight: 600;
+      white-space: nowrap;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-bottom: 2px solid var(--border);
+      user-select: none;
+    }
+    
+    /* 仅对 .sortable 的表格显示排序提示 */
+    .sortable th { cursor: pointer; }
+    .sortable th:hover { color: var(--accent-primary); background: #1a1a1a; }
+    .sortable th::after { content: ' ⇅'; opacity: 0.28; font-size: 10px; }
+
+    .data-table td:first-child, .data-table th:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 11;
+      background: var(--bg-panel);
+      border-right: 1px solid var(--border);
+    }
+    .data-table tr:hover td { background: rgba(255,255,255,0.03); }
+    .cell-action { color: var(--accent-primary); font-weight: 600; background: rgba(10,132,255,0.05) !important; }
+    .cell-evidence { 
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+        color: rgba(255,255,255,0.75);
+        white-space: nowrap;
+        font-size: 11px;
+    }
+    .badge-p0 { background: rgba(255, 69, 58, 0.2); color: #ff453a; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+    .badge-p1 { background: rgba(255, 159, 10, 0.2); color: #ff9f0a; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+
+    /* ===== 2.2 对标表：桌面端一眼看全 ===== */
+    .table-full {
+      overflow-x: visible !important;
+      overflow-y: visible !important;
+    }
+    .table-full .data-table {
+      min-width: 0 !important;
+      width: 100%;
+      table-layout: fixed;
+    }
+    .table-full .data-table th,
+    .table-full .data-table td {
+      white-space: normal !important;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      font-size: 12px;
+      line-height: 1.55;
+      padding: 12px;
+    }
+    @media (min-width: 1025px){
+      .table-full .data-table td:first-child,
+      .table-full .data-table th:first-child {
+        position: static !important;
+        background: var(--bg-panel);
+      }
+    }
+    @media (max-width: 1024px){
+      .table-full{ overflow-x: auto !important; }
+    }
+
+    /* RICE chart */
+    .rice-chart {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin: 18px 0;
+    }
+    .rice-row {
+      display: grid;
+      grid-template-columns: 220px 1fr 46px;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .rice-row:last-child{ border-bottom:none; }
+    .rice-name{ font-size: 12px; font-weight: 700; }
+    .rice-bar {
+      height: 10px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .rice-bar span {
+      display:block;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-highlight));
+      border-radius: 999px;
+    }
+    .rice-score{ font-size: 12px; font-weight: 900; color: var(--accent-highlight); text-align:right; }
+
+    @media (max-width: 1024px){
+      .rice-row{ grid-template-columns: 1fr; }
+      .rice-score{ text-align:left; }
+    }
+
+    /* Takeaways Box */
+    .takeaway-box {
+        background: rgba(255, 159, 10, 0.05);
+        border: 1px dashed rgba(255, 159, 10, 0.3);
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-top: 12px;
+        font-size: 13px;
+        color: #ddd;
+    }
+    .takeaway-title {
+        color: var(--accent-orange);
+        font-weight: bold;
+        font-size: 12px;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+        display: block;
+    }
+
+    /* ===== 四象限图（真图标版） ===== */
+    .quadrant-container {
+      position: relative; height: 450px; background: var(--bg-panel);
+      border: 1px solid var(--border); border-radius: var(--radius); margin: 30px 0;
+      cursor: zoom-in;
+    }
+    .q-corner { position: absolute; font-size: 12px; font-weight: bold; color: rgba(255,255,255,0.15); text-transform: uppercase; padding: 15px; pointer-events: none; }
+    .qc-tl { top: 0; left: 0; }
+    .qc-tr { top: 0; right: 0; text-align: right; color: rgba(10, 132, 255, 0.22); }
+    .qc-bl { bottom: 0; left: 0; }
+    .qc-br { bottom: 0; right: 0; text-align: right; }
+    .q-caption { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 11px; color: var(--text-muted); background: rgba(0,0,0,0.3); padding: 2px 8px; border-radius: 10px; }
+
+    .q-point {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      white-space: nowrap;
+      transition: all 0.4s var(--ease-out-back);
+      cursor: pointer;
+      z-index: 10;
+    }
+    .q-point:hover { transform: translate(-50%, -50%) scale(1.22); z-index: 30; }
+
+    .app-icon{
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      margin: 0 auto 8px;
+      display:flex; align-items:center; justify-content:center;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      overflow:hidden;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.5);
+    }
+    .app-icon img{
+      width:100%; height:100%;
+      object-fit: cover;
+      display:block;
+    }
+    .app-fallback{
+      font-weight: 900; font-size: 18px; color:#fff;
+      display:none;
+    }
+    .app-icon.fallback .app-fallback{ display:block; }
+    .app-icon.fallback img{ display:none; }
+
+    .q-label { font-size: 12px; font-weight: 800; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+
+    /* Tooltip */
+    .q-point .q-tooltip {
+      visibility: hidden; opacity: 0; position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.9); border: 1px solid var(--border); padding: 8px 12px; border-radius: 6px;
+      font-size: 11px; width: max-content; max-width: 220px; color: #fff; text-align: left;
+      transition: all 0.2s; pointer-events: none; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+      z-index: 100;
+    }
+    .q-point:hover .q-tooltip { visibility: visible; opacity: 1; bottom: 130%; }
+
+    /* 泳道图 */
+    .flow-container { display: flex; gap: 15px; align-items: stretch; overflow-x: auto; padding: 20px 0; cursor: zoom-in; }
+    .flow-step {
+      flex: 1; min-width: 160px; background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 8px; padding: 16px; position: relative; display: flex; flex-direction: column; align-items: flex-start; text-align: left;
+      transition: transform 0.2s; cursor: pointer;
+    }
+    .flow-step:hover { transform: translateY(-5px); border-color: var(--accent-primary); }
+    .flow-step::after {
+      content: '→'; position: absolute; right: -18px; top: 50%; transform: translateY(-50%);
+      color: var(--text-muted); font-size: 18px; font-family: monospace;
+    }
+    .flow-step:last-child::after { display: none; }
+    .lane-tag { font-size: 9px; padding: 2px 6px; border-radius: 4px; margin-bottom: 8px; font-weight: bold; text-transform: uppercase; align-self: flex-start; }
+    .lane-user { background: rgba(10, 132, 255, 0.2); color: var(--accent-primary); }
+    .lane-sys { background: rgba(255, 159, 10, 0.2); color: var(--accent-orange); }
+    .lane-rec { background: rgba(50, 215, 75, 0.2); color: var(--accent-success); }
+    .flow-title { font-size: 13px; font-weight: 800; color: #fff; margin-bottom: 4px; }
+    .flow-desc { font-size: 11px; color: var(--text-sub); margin-top: 6px; line-height: 1.4; }
+
+    /* 手机模型 */
+    .mockup-wrapper { display: flex; justify-content: center; gap: 60px; flex-wrap: wrap; margin: 50px 0; }
+    .phone-col { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+    .phone-frame {
+      width: 300px; height: 600px; background: #000; border-radius: 40px; border: 8px solid #2a2a2a;
+      position: relative; box-shadow: 0 30px 80px rgba(0,0,0,0.8); overflow: hidden; cursor: zoom-in; transition: transform 0.3s;
+    }
+    .phone-frame:hover { transform: translateY(-5px); box-shadow: 0 40px 90px rgba(0,0,0,0.9); }
+    .dynamic-island { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); width: 90px; height: 26px; background: #000; border-radius: 14px; z-index: 20; }
+    .app-screen { height: 100%; width: 100%; display: flex; flex-direction: column; padding-top: 30px; background: #000; overflow: hidden; position: relative; }
+    .variant-label { font-size: 11px; color: var(--accent-highlight); background: rgba(100, 210, 255, 0.1); padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(100, 210, 255, 0.3); }
+
+    /* UI 组件细节 */
+    .conclusion-bar { margin: 10px 20px 0; font-size: 15px; font-weight: 900; color: #fff; line-height: 1.3; text-shadow: 0 0 15px rgba(10, 132, 255, 0.6); letter-spacing: -0.5px; }
+    .conclusion-bar.orange { text-shadow: 0 0 15px rgba(255, 159, 10, 0.6); }
+
+    /* 模板A：硬核风格 */
+    .bg-hardcore {
+      background: #111;
+      background-image:
+        linear-gradient(45deg, #1a1a1a 25%, transparent 25%, transparent 75%, #1a1a1a 75%, #1a1a1a),
+        linear-gradient(45deg, #1a1a1a 25%, transparent 25%, transparent 75%, #1a1a1a 75%, #1a1a1a);
+      background-position: 0 0, 10px 10px;
+      background-size: 20px 20px;
+      position: relative;
+    }
+    .bg-hardcore::before {
+      content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: radial-gradient(circle at 50% 30%, rgba(10, 132, 255, 0.15), transparent 80%);
+      pointer-events: none;
+    }
+    .hardcore-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 20px;
+      margin: 15px 0;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    .hardcore-stat { flex:1; text-align: center; border-right: 1px solid rgba(255,255,255,0.1); }
+    .hardcore-stat:last-child { border-right: none; }
+    .hardcore-val { font-size: 28px; font-weight: 900; color: #fff; font-family: "SF Pro Display"; text-shadow: 0 0 10px rgba(255,255,255,0.25); }
+    .hardcore-lbl { font-size: 10px; color: #888; text-transform: uppercase; margin-top: 4px; }
+    .pr-badge { display: inline-block; background: var(--accent-danger); color: #fff; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; transform: skewX(-10deg); margin-left: 5px; }
+
+    /* 模板B 动态背景 */
+    .bg-dynamic-b { background: linear-gradient(135deg, #1a1c1a 0%, #000000 100%); position: relative; }
+    .bg-dynamic-b::before {
+      content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: radial-gradient(circle at top right, rgba(50, 215, 75, 0.15), transparent 70%);
+      pointer-events: none;
+    }
+
+    .b-card { background: #1c1c1e; margin: 10px 16px; border-radius: 12px; padding: 16px; border: 1px solid #333; }
+    .b-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+    .b-big-num { font-size: 28px; font-weight: 900; color: #fff; font-family: "SF Pro Display"; }
+    .b-label { font-size: 11px; color: #888; text-transform: uppercase; }
+
+    /* 宏量营养条 */
+    .macro-group { margin-top: 10px; }
+    .macro-item { margin-bottom: 6px; }
+    .macro-label { font-size: 10px; color: #ccc; display: flex; justify-content: space-between; margin-bottom: 2px; }
+    .macro-bar-bg { height: 4px; background: #333; border-radius: 2px; width: 100%; }
+    .macro-bar-fill { height: 100%; border-radius: 2px; }
+
+    /* 餐图：真实图片位 + fallback */
+    .meal-media{
+      margin-top: 10px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.03);
+    }
+    .meal-media img{
+      width:100%; height: 160px;
+      object-fit: cover;
+      display:block;
+    }
+    .meal-meta{
+      padding: 10px 12px;
+      font-size: 11px;
+      color: var(--text-sub);
+      display:flex; justify-content: space-between; gap: 10px;
+      background: rgba(0,0,0,0.45);
+    }
+    .meal-pill{
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      white-space: nowrap;
+    }
+
+    /* 折叠交互：修复 hidden 冲突，改为 class open 动画 */
+    .detail-block {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease-out, opacity 0.25s ease-in;
+    }
+    .detail-block.open {
+      max-height: 1000px; /* 增加高度防止截断 */
+      opacity: 1;
+      margin-top: 10px;
+      padding-bottom: 10px;
+    }
+    .pill-toggle{
+      display: inline-block; background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 16px;
+      font-size: 11px; color: #fff; margin-bottom: 5px; cursor: pointer; border: 1px solid rgba(255,255,255,0.2);
+      transition: all 0.25s; user-select: none;
+    }
+    .pill-toggle:hover { background: rgba(255,255,255,0.2); transform: scale(1.04); }
+    .pill-toggle.active { background: var(--accent-primary); border-color: var(--accent-primary); }
+
+    /* 漏斗图 */
+    .funnel-container { display: flex; flex-direction: column; align-items: center; margin: 40px 0; cursor: zoom-in; }
+    .funnel-step {
+      width: var(--width); height: 44px; margin-bottom: 4px;
+      background: linear-gradient(to right, var(--color), #111);
+      display: flex; justify-content: space-between; align-items: center; padding: 0 24px;
+      color: #fff; font-size: 13px; border-radius: 4px; position: relative;
+      clip-path: polygon(0 0, 100% 0, calc(100% - 12px) 100%, 12px 100%);
+      transition: transform 0.2s; cursor: pointer;
+    }
+    .funnel-step:hover { transform: translateX(5px); filter: brightness(1.2); }
+    .funnel-step span:last-child { font-weight: 900; }
+    .funnel-arrow { text-align: center; color: var(--text-muted); font-size: 11px; margin: 2px 0; font-family: monospace; }
+    .funnel-caption { font-size: 12px; color: #666; margin-top: 15px; text-align: center; border-top: 1px solid #222; padding-top: 10px;}
+
+    /* 路径图 (Path Map - Scroll Reveal) */
+    .path-map { display: flex; flex-direction: column; gap: 40px; margin-top: 40px; position: relative; padding-left: 20px; cursor: zoom-in; }
+    .path-map::before {
+      content: ''; position: absolute; left: 35px; top: 20px; bottom: 20px; width: 4px;
+      background: linear-gradient(to bottom, var(--accent-primary), var(--accent-success), var(--accent-secondary));
+      border-radius: 2px; opacity: 0.5;
+    }
+    .path-node { display: flex; align-items: flex-start; gap: 20px; position: relative; opacity: 0; transform: translateY(20px); transition: all 0.6s ease-out; }
+    .path-node.visible { opacity: 1; transform: translateY(0); }
+    .path-icon {
+      width: 34px; height: 34px; border-radius: 50%; background: #000; border: 3px solid var(--node-color);
+      display: flex; align-items: center; justify-content: center; z-index: 2; flex-shrink: 0;
+      color: var(--node-color); font-weight: bold; font-size: 12px; box-shadow: 0 0 0 5px var(--bg-body);
+    }
+    .path-card { flex: 1; background: var(--bg-card); border: 1px solid var(--border); padding: 16px; border-radius: 12px; border-left: 4px solid var(--node-color); }
+    .path-title { font-size: 14px; font-weight: 800; color: #fff; display: flex; justify-content: space-between; flex-direction: column; gap: 8px;}
+    .path-badge { font-size: 10px; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; color: var(--text-sub); width: fit-content; }
+    .path-content { margin-top: 10px; font-size: 13px; color: var(--text-sub); }
+    .path-list { list-style: none; padding: 0; margin: 8px 0; }
+    .path-list li { margin-bottom: 4px; padding-left: 14px; position: relative; }
+    .path-list li::before { content: '•'; color: var(--node-color); position: absolute; left: 0; }
+    .path-not { font-size: 11px; color: #666; border-top: 1px dashed #333; margin-top: 8px; padding-top: 6px; }
+    .rm-gate { margin-top: 8px; font-size: 12px; color: #cbd5e1; padding: 8px 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(10,132,255,0.08); }
+
+    /* Lightbox */
+    #lightbox {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 999; display: none;
+      align-items: center; justify-content: center; backdrop-filter: blur(10px);
+    }
+    #lightbox.active { display: flex; animation: fadeIn 0.2s ease-out; }
+    #lightbox-content { max-width: 95vw; max-height: 95vh; overflow:auto; }
+    #lightbox-close { position: fixed; top: 22px; right: 22px; color: #fff; font-size: 40px; cursor: pointer; line-height: 1; z-index: 1001; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* 打印控制 - 分页优化 */
+    @media print {
+      aside { display: none; }
+      .layout { display: block; padding: 0; }
+      body { background: #fff; color: #000; }
+      .project-declaration, .four-part-card { border: 1px solid #000; color: #000; background: none; }
+      section { break-inside: avoid; border-bottom: 1px solid #ccc; page-break-inside: avoid; }
+      
+      /* reset：避免 #print-toc 的 h2 干扰正文分页 */
+      h2 { page-break-before: auto; color: #000; text-shadow: none; }
+      
+      /* 只让正文每个章节的 h2 从新页开始 */
+      main > section > h2 { page-break-before: always; }
+      main > section:first-of-type > h2 { page-break-before: auto; }
+
+      .app-screen { background: #fff !important; color: #000 !important; border: 1px solid #ccc; }
+      .b-card, .hardcore-card { border: 1px solid #ccc; background: #fff; color: #000; }
+      .b-big-num, .hardcore-val { color: #000; }
+      .flow-step, .path-card, .data-table th, .data-table td { border-color: #999; }
+      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      
+      /* Print TOC */
+      #print-toc { display: block !important; margin-bottom: 40px; page-break-after: always; }
+      #print-toc h2 { color: #000; border-bottom: 2px solid #000; padding-bottom: 10px; }
+      #print-toc ul { padding-left: 0; list-style: none; }
+      #print-toc li { margin-bottom: 8px; border-bottom: 1px dashed #ccc; display: flex; justify-content: space-between; }
+      #print-toc span { color: #000; font-weight: bold; }
+    }
+    
+    #print-toc { display: none; }
+    
+    /* 竞品画像卡 Grid */
+    .persona-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+        margin: 20px 0;
+    }
+    .persona-card {
+        background: #1c1c1e;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .persona-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-bottom: 1px solid var(--border-light);
+        padding-bottom: 12px;
+    }
+    .persona-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    .persona-tag {
+        font-size: 10px;
+        background: rgba(255,255,255,0.1);
+        padding: 2px 6px;
+        border-radius: 4px;
+        color: #ddd;
+    }
+    .persona-insight {
+        font-size: 12px;
+        color: #bbb;
+        line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Lightbox -->
+<div id="lightbox">
+  <div id="lightbox-close" title="关闭">×</div>
+  <div id="lightbox-content"></div>
+</div>
+
+<div class="layout">
+  <!-- 侧边导航 -->
+  <aside>
+    <input type="text" id="navSearch" class="nav-search" placeholder="🔍 快速搜索章节..." />
+
+    <!-- 移动端 -->
+    <div class="mobile-nav-root">
+      <details>
+        <summary>一、竞品分析 (主文)</summary>
+        <a href="#exec-summary" class="nav-item">0.8 结论先行（Executive Summary）</a>
+        <a href="#project-goals" class="nav-item">0.5 分析目的与评估口径</a>
+        <a href="#summary" class="nav-item">1. 竞品结论摘要</a>
+        <a href="#competitor" class="nav-item">2. 竞品分层与对标</a>
+        <a href="#diagnosis" class="nav-item">2.4 现状诊断</a>
+        <a href="#gap-summary" class="nav-item">2.5 Gap 总结</a>
+      </details>
+      <details>
+        <summary>二、行动假设（附录，可选）</summary>
+        <a href="#user-analysis" class="nav-item">3. 用户需求场景</a>
+        <a href="#flow-analysis" class="nav-item">4. 分享闭环链路</a>
+        <a href="#module-matrix" class="nav-item">5. 建议项汇总</a>
+        <a href="#rice-ranking" class="nav-item">5.1 优先级排序</a>
+        <a href="#wireframe-compare" class="nav-item">6.0 线框对比</a>
+        <a href="#visual-design" class="nav-item">6. 视觉方案 (UI)</a>
+        <a href="#risk-roadmap" class="nav-item">8. 风险与路线图</a>
+        <a href="#delivery" class="nav-item">9. 结论复述</a>
+      </details>
+    </div>
+
+    <!-- 桌面端 -->
+    <div class="nav-group-container">
+      <div class="nav-group">
+        <div class="nav-title">一、竞品分析 (主文)</div>
+        <a href="#exec-summary" class="nav-item">0.8 结论先行（Executive Summary）</a>
+        <a href="#project-goals" class="nav-item">0.5 分析目的与评估口径</a>
+        <a href="#summary" class="nav-item">1. 竞品结论摘要</a>
+        <a href="#competitor" class="nav-item">2. 竞品分层与对标</a>
+        <a href="#diagnosis" class="nav-item">2.4 现状诊断</a>
+        <a href="#gap-summary" class="nav-item">2.5 Gap 总结</a>
+      </div>
+      <div class="nav-group">
+        <div class="nav-title">二、行动假设（附录，可选）</div>
+        <a href="#user-analysis" class="nav-item">3. 用户需求场景</a>
+        <a href="#flow-analysis" class="nav-item">4. 分享闭环链路</a>
+        <a href="#module-matrix" class="nav-item">5. 建议项汇总</a>
+        <a href="#rice-ranking" class="nav-item">5.1 优先级排序</a>
+        <a href="#wireframe-compare" class="nav-item">6.0 线框对比</a>
+        <a href="#visual-design" class="nav-item">6. 视觉方案 (UI)</a>
+        <a href="#risk-roadmap" class="nav-item">8. 风险与路线图</a>
+        <a href="#delivery" class="nav-item">9. 结论复述</a>
+      </div>
+    </div>
+
+    <div style="margin-top: 30px;">
+      <button onclick="window.print()" style="width:100%; padding:12px; background:var(--accent-primary); border:none; border-radius:10px; color:#fff; font-weight:700; cursor:pointer; transition: opacity 0.2s;">打印/导出 PDF (建议Chrome)</button>
+      <div style="font-size:11px; color:#666; margin-top:8px; text-align:center;">提示：推荐 Chrome → 打印 → 保存为 PDF</div>
+    </div>
+  </aside>
+
+  <main>
+    <!-- 打印专用目录 -->
+    <div id="print-toc">
+      <h2>目录 (Table of Contents)</h2>
+      <ul>
+        <li><span>0.8 结论先行（Executive Summary）</span></li>
+        <li><span>0.5 分析目的与评估口径</span></li>
+        <li><span>1. 竞品结论摘要</span></li>
+        <li><span>2. 竞品分层与对标</span></li>
+        <li><span>2.4 现状诊断</span></li>
+        <li><span>2.5 Gap 总结</span></li>
+        <li><span>附录：改版建议与验证设计</span></li>
+      </ul>
+    </div>
+
+    <header>
+      <h1>训记App分享体系：竞品分析（主文）与改版建议（附录）</h1>
+
+      <div class="project-declaration">
+        <strong>项目声明（实习生模拟项目）：</strong><br>
+        本报告为产品经理实习生作品集项目，基于产品体验与逻辑推演形成；不做用户访谈与真实上线验证，项目不上线；文中漏斗与指标用于展示验证设计与评估方法。
+      </div>
+
+      <div class="meta-row">
+        <span class="tag">报告版本: 最终交付版 v8.9_Portfolio</span>
+        <span class="tag">核心策略: 闭环链路 × 模块化卡片</span>
+        <span class="tag">边界约束：不引入社区机制</span>
+      </div>
+    </header>
+
+    <!-- ✅ Executive Summary：结论先行（主文必读） -->
+    <section id="exec-summary" style="margin-bottom:60px;">
+      <h2>0.8 结论先行（Executive Summary）</h2>
+
+      <div class="four-part-card" style="border-left-color: var(--accent-orange);">
+        <div class="fpc-title" style="color: var(--accent-orange);">一句话总论</div>
+        <div class="fpc-grid">
+          <div class="fpc-item">
+            分享做得好的竞品不是“数据更全”，而是把分享做成
+            <strong>触发（情绪峰值）</strong>、<strong>物料（3秒可读）</strong>、<strong>承接（可回流）</strong>的闭环；训记短板集中在<strong>物料结构</strong>与<strong>承接能力</strong>。
+          </div>
+        </div>
+      </div>
+
+      <div class="data-table-wrapper table-full">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>关键发现（差距）</th>
+              <th>一句话影响</th>
+              <th>优先改什么（方向级）</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>触发覆盖不足</strong>（PR/完赛/连续）</td>
+              <td>错过情绪峰值，分享动机快速衰减</td>
+              <td class="cell-action">高光触发体系（PR/连续/总容量）+ 清晰CTA</td>
+            </tr>
+            <tr>
+              <td><strong>物料路人不可读</strong></td>
+              <td>传播效率低，转发意愿弱</td>
+              <td class="cell-action">信息层级重排：结论句 + 2-3大数字 + 明细折叠</td>
+            </tr>
+            <tr>
+              <td><strong>分享后无承接</strong></td>
+              <td>外部传播断层，无法形成回流闭环</td>
+              <td class="cell-action">最小承接入口（二维码/落地页）先跑通闭环</td>
+            </tr>
+            <tr>
+              <td><strong>隐私默认不安全</strong></td>
+              <td>顾虑导致直接不分享</td>
+              <td class="cell-action">默认隐私保护 + ≤3步开关（先保底完成率）</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="four-part-card" style="border-left-color: var(--accent-success);">
+        <div class="fpc-title" style="color: var(--accent-success);">Top5 优先级（只写方向，不写实施细节）</div>
+        <ul class="fpc-actions">
+          <li>1）默认隐私保护 + ≤3步开关</li>
+          <li>2）信息层级重排（结论句+大数字+折叠明细）</li>
+          <li>3）一键生成稳定性（默认可用）</li>
+          <li>4）渠道适配与默认文案（朋友圈/聊天/小红书）</li>
+          <li>5）高光触发体系（PR/连续/总容量）</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 0.5 目标与约束 -->
+    <section id="project-goals">
+      <h2>0.5 分析目的与评估口径（本次竞品分析要回答什么）</h2>
+      <div class="focus-module">
+        <div class="focus-content">
+          <div class="focus-box">
+            <div class="focus-label">🎯 分析目的 (Purpose)</div>
+            <div class="focus-text">
+              1）识别“分享做得好的竞品”在触发、物料结构、隐私、承接上的共性做法；<br>
+              2）明确训记在分享链路中的关键短板，给出可迁移原则（不社区化前提下）；<br>
+              3）输出“优先级明确的机会点清单”（用于附录的 RICE 排序）。
+            </div>
+          </div>
+          <div class="focus-box">
+            <div class="focus-label">📐 评估口径与边界 (Scope)</div>
+            <div class="focus-text">
+              <strong>评估口径（6 维度）：</strong>触发时机 / 信息可读性 / 编辑成本 / 隐私默认 / 回流承接 / 渠道适配<br>
+              <strong>边界约束：</strong>不引入点赞评论关注等社区机制；分享物料需“3 秒读懂”；隐私默认保护。
+            </div>
+          </div>
+        </div>
+        <div class="takeaway-box" style="margin-top:14px;">
+          <span class="takeaway-title">❓ 本次分析要回答的 3 个关键问题</span>
+          1）如何把分享从“截图行为”改造成“一键可传播素材”，提升分享完成率？<br>
+          2）如何在“严禁社区化”的约束下，仍然补齐回流承接与归因闭环？<br>
+          3）优先改哪 5 个点，才能用最短周期验证“分享率↑ / 回流↑”是否成立？
+        </div>
+      </div>
+    </section>
+
+    <!-- 1. 核心发现 -->
+    <section id="summary">
+      <h2>1. 竞品结论摘要</h2>
+      <div class="four-part-card" style="border-left-color: var(--accent-orange);">
+        <div class="fpc-title" style="color: var(--accent-orange);">一句话结论（Key Insight）</div>
+        <div class="fpc-grid">
+          <div class="fpc-item">
+            分享做得好的竞品不是“数据更全”，而是把分享做成
+            <strong>触发（情绪峰值）</strong>、<strong>物料（3秒可读）</strong>、<strong>承接（可回流）</strong>的闭环；训记短板集中在<strong>物料结构</strong>与<strong>承接能力</strong>。
+          </div>
+        </div>
+        <ul class="fpc-actions">
+          <li><strong>关键做法：</strong>把分享入口绑定到“成就感峰值”（PR/完赛/连胜等），在用户最愿意被看见的时刻给出明确 CTA。</li>
+          <li><strong>关键做法：</strong>传播物料先给“结论句 + 2-3 个大数字”，把专业明细后置/折叠，让路人 3 秒读懂。</li>
+          <li><strong>训记差距：</strong>问题不在数据量，而在“传播结构”和“回流承接”两项能力缺口。</li>
+        </ul>
+      </div>
+      <div class="takeaway-box" style="margin-top:14px;">
+          <span class="takeaway-title">✅ 总原则</span>
+          学竞品的“触发时机 + 物料可读结构 + 最小承接回流”，不学竞品的“社区互动机制”。
+      </div>
+    </section>
+
+    <!-- 2. 竞品分层 -->
+    <section id="competitor">
+      <h2>2. 竞品分层与深度对标</h2>
+
+      <!-- 2.0 竞品选择与分类 -->
+      <div class="focus-module" style="margin-bottom:20px; border-left:4px solid var(--accent-secondary);">
+         <h4 style="margin:0 0 10px; font-size:14px; color:var(--accent-secondary);">📌 2.0 竞品选择逻辑</h4>
+         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+             <div style="font-size:13px; color:#ccc; line-height:1.6;">
+                <strong>直接竞品：</strong><br>
+                • <strong>Keep</strong> (综合健身)：分享体系最成熟，具有参考性。<br>
+                • <strong>咕咚</strong> (跑步数据)：数据可视化与大数字展示的标杆。<br>
+                <strong>间接竞品：</strong><br>
+                • <strong>薄荷健康</strong> (饮食记录)：高频生活化分享，借鉴其低门槛。<br>
+                <strong>替代竞品：</strong><br>
+                • <strong>系统备忘录/相册</strong>：用户当前的替代方案（手动截图/拼图）。
+             </div>
+             <div style="font-size:13px; color:#ccc; line-height:1.6;">
+                <strong>分析范围：</strong><br>
+                • <strong>范围：</strong>分享链路体验（训练完成→分享→承接）<br>
+                <div style="margin-top:16px; padding-top:14px; border-top:1px dashed rgba(255,255,255,0.15); font-size:13px; color:#ccc; line-height:1.7;">
+                  <strong>说明：</strong>本报告以“分享闭环”视角做方案推演与验证设计展示。
+                </div>
+             </div>
+         </div>
+      </div>
+
+      <h3>2.1 竞品定位四象限（真图标版）</h3>
+      <p style="font-size:12px; color:var(--text-sub); margin-top:-10px;">
+        说明：坐标为相对评估（基于“路人可读性 × 信息密度”的主观判断）。
+      </p>
+
+      <div class="quadrant-container" title="点击放大" aria-label="点击放大 四象限">
+        <div class="q-corner qc-tl">专业硬核<br><span style="font-size:10px;font-weight:normal;opacity:0.7">教练友好</span></div>
+        <div class="q-corner qc-tr">硬核且可传播<br><span style="font-size:10px;font-weight:normal;opacity:0.7">训记目标</span></div>
+        <div class="q-corner qc-bl">轻量记录<br><span style="font-size:10px;font-weight:normal;opacity:0.7">弱传播</span></div>
+        <div class="q-corner qc-br">社交友好<br><span style="font-size:10px;font-weight:normal;opacity:0.7">路人可读</span></div>
+
+        <div style="position:absolute; top:50%; width:100%; border-top:1px dashed var(--border);"></div>
+        <div style="position:absolute; left:50%; height:100%; border-left:1px dashed var(--border);"></div>
+
+        <svg style="position:absolute; inset:0; pointer-events:none; overflow:visible;">
+          <defs>
+            <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+              <path d="M0,0 L0,6 L9,3 z" fill="#fff" opacity="0.8" />
+            </marker>
+          </defs>
+          <line x1="26%" y1="20%" x2="63%" y2="20%" stroke="#fff" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrow)" opacity="0.6" />
+        </svg>
+
+        <!-- 点位：真图标 (Updated to use data-key) -->
+        <div class="q-point" style="top:20%; left:25%;">
+          <div class="app-icon" data-fallback="训">
+             <img data-key="XUNJI_ICON" src="" alt="训记图标" onerror="this.parentElement.classList.add('fallback')">
+            <div class="app-fallback">训</div>
+          </div>
+          <div class="q-label">训记现状</div>
+          <div class="q-tooltip">
+              数据硬核，但分享形式单一 → 路人读不懂 → 传播弱<br>
+              <span style="color:#aaa; font-size:10px;">证据路径：训练结束页 > 系统分享 > 无模板预览</span><br>
+              <span style="color:var(--accent-primary); font-size:10px;">证据编号：#X1</span>
+          </div>
+        </div>
+
+        <div class="q-point" style="top:20%; left:65%;">
+          <div class="app-icon" data-fallback="训">
+             <img data-key="XUNJI_ICON" src="" alt="训記图标" onerror="this.parentElement.classList.add('fallback')">
+            <div class="app-fallback">訓</div>
+          </div>
+          <div class="q-label" style="color:var(--accent-primary)">训记目标</div>
+          <div class="q-tooltip">
+            保持专业内核，通过“3秒读懂+轻承接”增强传播力<br>
+            <span style="color:#aaa; font-size:10px;">证据路径：对标结论 > 物料结构 > 承接入口</span><br>
+            <span style="color:var(--accent-primary); font-size:10px;">证据编号：#X0</span>
+          </div>
+        </div>
+
+        <div class="q-point" style="top:55%; left:85%;">
+          <div class="app-icon" data-fallback="K">
+             <img data-key="KEEP_ICON" src="" alt="Keep图标" onerror="this.parentElement.classList.add('fallback')">
+            <div class="app-fallback">K</div>
+          </div>
+          <div class="q-label">Keep</div>
+          <div class="q-tooltip">
+            社区承接强、模板成熟、回流闭环完善<br>
+            <span style="color:#aaa; font-size:10px;">证据路径：完赛/成就弹窗 > 分享模板选择 > 带参承接</span><br>
+            <span style="color:var(--accent-primary); font-size:10px;">证据编号：#K1</span>
+          </div>
+        </div>
+
+        <div class="q-point" style="top:75%; left:80%;">
+          <div class="app-icon" data-fallback="薄">
+             <img data-key="BOHE_ICON" src="" alt="薄荷健康图标" onerror="this.parentElement.classList.add('fallback')">
+            <div class="app-fallback">薄</div>
+          </div>
+          <div class="q-label">薄荷</div>
+          <div class="q-tooltip">
+            饮食拍照高频，生活化传播更顺滑<br>
+            <span style="color:#aaa; font-size:10px;">证据路径：记录完成 > 一键生成卡片 > 生活化摘要</span><br>
+             <span style="color:var(--accent-primary); font-size:10px;">证据编号：#B1</span>
+          </div>
+        </div>
+
+        <div class="q-point" style="top:60%; left:60%;">
+          <div class="app-icon" data-fallback="咕">
+             <img data-key="GUDONG_ICON" src="" alt="咕咚图标" onerror="this.parentElement.classList.add('fallback')">
+            <div class="app-fallback">咕</div>
+          </div>
+          <div class="q-label">咕咚</div>
+          <div class="q-tooltip">
+             成绩单式大数字展示，满足“炫耀/对比”<br>
+             <span style="color:#aaa; font-size:10px;">证据路径：运动结束 > 成绩单弹窗 > 大数字水印卡</span><br>
+             <span style="color:var(--accent-primary); font-size:10px;">证据编号：#G1</span>
+          </div>
+        </div>
+
+        <div class="q-caption">坐标为相对评估（基于分享卡信息密度/路人可读性的主观判断）</div>
+      </div>
+
+      <!-- 2.2.2 竞品分享链路对比 -->
+      <h3>2.2.2 竞品分享链路对比</h3>
+      <div class="flow-container" style="padding:10px 0; overflow-x:auto;">
+          <div style="display:flex; flex-direction:column; gap:10px; width:100%;">
+              <!-- Header Row -->
+              <div style="display:grid; grid-template-columns: 80px 1fr 1fr 1fr 1fr; gap:10px; font-size:12px; color:#888; font-weight:bold; border-bottom:1px solid #333; padding-bottom:5px;">
+                  <div>App</div>
+                  <div>1. 触发</div>
+                  <div>2. 预览/编辑</div>
+                  <div>3. 分享</div>
+                  <div>4. 承接/回流</div>
+              </div>
+              <!-- Keep Row -->
+              <div style="display:grid; grid-template-columns: 80px 1fr 1fr 1fr 1fr; gap:10px; font-size:12px; color:#fff; align-items:center;">
+                  <div style="color:var(--accent-secondary); font-weight:bold;">Keep</div>
+                  <div style="font-size:11px; color:#bbb;">自动弹窗<br>(完赛/成就)</div>
+                  <div style="font-size:11px; color:#bbb;">模板丰富<br>一键美化</div>
+                  <div style="font-size:11px; color:#bbb;">微信/朋友圈<br>社区动态</div>
+                  <div style="font-size:11px; color:#bbb;">带参小程序码<br>-> 活动/社区页</div>
+              </div>
+              <!-- Codoon Row -->
+              <div style="display:grid; grid-template-columns: 80px 1fr 1fr 1fr 1fr; gap:10px; font-size:12px; color:#fff; align-items:center; margin-top:5px;">
+                  <div style="color:var(--accent-success); font-weight:bold;">咕咚</div>
+                  <div style="font-size:11px; color:#bbb;">强制弹窗<br>(成绩单)</div>
+                  <div style="font-size:11px; color:#bbb;">水印覆盖<br>大数字</div>
+                  <div style="font-size:11px; color:#bbb;">微信/朋友圈<br>运动圈</div>
+                  <div style="font-size:11px; color:#bbb;">静态二维码<br>-> 下载页</div>
+              </div>
+              <!-- Xunji Row -->
+              <div style="display:grid; grid-template-columns: 80px 1fr 1fr 1fr 1fr; gap:10px; font-size:12px; color:#fff; align-items:center; margin-top:5px; border-top:1px dashed #444; padding-top:5px;">
+                  <div style="color:var(--text-sub); font-weight:bold;">训记</div>
+                  <div style="font-size:11px; color:#666;">手动截图<br>(无弹窗)</div>
+                  <div style="font-size:11px; color:#666;">无/纯文本</div>
+                  <div style="font-size:11px; color:#666;">系统分享</div>
+                  <div style="font-size:11px; color:#666;">无/断层</div>
+              </div>
+          </div>
+      </div>
+
+      <h3>2.2 详细功能对标表</h3>
+      <p style="font-size:12px; color:var(--text-sub); margin-top:-10px;">提示：表头可点击排序。</p>
+      
+      <div class="focus-module" style="margin-top:16px;">
+        <div class="focus-header">
+          <span class="focus-icon">🧩</span>
+          <span class="focus-title">对标只看“分享闭环 6 维度”，每一行都必须能落到可验证指标</span>
+        </div>
+        <div class="focus-content">
+          <div class="focus-box">
+            <div class="focus-label">读表方式</div>
+            <div class="focus-text">
+              <strong>差距结论</strong>＝“对分享/回流的影响” + “缺失的关键能力”<br>
+              <strong>可迁移原则</strong>＝基于竞品做法提炼的通用规则（非具体方案）<br>
+              <strong>评估口径</strong>＝判断该维度好坏的量化标准
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="data-table-wrapper table-full">
+        <table class="data-table sortable" id="benchmarkTable">
+          <thead>
+            <tr>
+              <th onclick="sortTable(0)">功能维度</th>
+              <th onclick="sortTable(1)">Keep</th>
+              <th onclick="sortTable(2)">薄荷</th>
+              <th onclick="sortTable(3)">咕咚</th>
+              <th onclick="sortTable(4)">训记现状</th>
+              <th onclick="sortTable(5)">差距结论</th>
+              <th onclick="sortTable(6)">竞品常见做法/规律</th>
+              <th onclick="sortTable(7)">评估口径</th>
+              <th onclick="sortTable(8)">证据编号</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>触发机制</strong></td>
+              <td>训练结束页/成就/PR自动弹窗</td>
+              <td>记录后自动弹窗提醒分享</td>
+              <td>运动结束强制弹出成绩单</td>
+              <td>用户需手动点击右上角/截图</td>
+              <td>错过情绪峰值（PR/成就），导致分享动机衰减；缺少强触发体系。</td>
+              <td class="cell-action">高分享率竞品通常把入口放在“成就感峰值”（PR/连胜/完赛）节点，以减少动机衰减。</td>
+              <td>PR触发分享率（PR触发后分享成功 / PR触发曝光）</td>
+              <td class="cell-evidence">#K1 / #G1</td>
+            </tr>
+            <tr>
+              <td><strong>回流承接</strong></td>
+              <td>小程序码/带参链接/活动页</td>
+              <td>站内动态/社区内容承接</td>
+              <td>水印/静态二维码</td>
+              <td>无/仅靠截图文本</td>
+              <td>外部传播后无承接页/无归因，流量断层且无法复盘效果。</td>
+              <td class="cell-action">能形成闭环的竞品至少提供一个“可回流承接”（下载/同款/活动页）；归因能力往往从粗到细逐步增强。</td>
+              <td>扫码→激活转化（新增激活 / 扫码到达）</td>
+              <td class="cell-evidence">#K2 / #G2</td>
+            </tr>
+            <tr>
+              <td><strong>可读性</strong></td>
+              <td>结论句+大数字+可视化图表</td>
+              <td>照片优先+摘要/热量圆环</td>
+              <td>核心数据特大号展示</td>
+              <td>数据密集表单，路人读不懂</td>
+              <td>信息密度过高，路人无法 3 秒读懂，传播效率低。</td>
+              <td class="cell-action">朋友圈传播效率更高的物料往往满足“结论前置 + 2-3 个大数字”，明细默认折叠以避免路人信息过载。</td>
+              <td>预览生成率（预览渲染成功 / 点击生成预览）</td>
+              <td class="cell-evidence">#G3 / #B1</td>
+            </tr>
+            <tr>
+              <td><strong>编辑成本</strong></td>
+              <td>模板丰富/一键美化</td>
+              <td>自动生成/可选配图</td>
+              <td>水印/简单数据模板</td>
+              <td>纯文本/无模板/需手动截图</td>
+              <td>生成成本高（截图/拼图），用户“想发但懒得发”，完成率下滑。</td>
+              <td class="cell-action">竞品普遍将“一键生成”作为默认路径；编辑能力多为可选增强，而非完成分享的必要步骤。</td>
+              <td>分享完成率</td>
+              <td class="cell-evidence">#K3</td>
+            </tr>
+            <tr>
+              <td><strong>隐私安全</strong></td>
+              <td>敏感信息脱敏/位置隐藏</td>
+              <td>可选隐藏热量/体重</td>
+              <td>运动轨迹风险提示</td>
+              <td>默认暴露所有数据</td>
+              <td>敏感信息默认暴露，用户顾虑大，直接影响分享完成率。</td>
+              <td class="cell-action">竞品在敏感字段（位置/体重/备注）上更倾向“默认保护”，以降低分享顾虑对完成率的影响。</td>
+              <td>开关使用率</td>
+              <td class="cell-evidence">#K4 / #B2 / #G4</td>
+            </tr>
+             <tr>
+              <td><strong>社交属性</strong></td>
+              <td>强社区/点赞/评论</td>
+              <td>圈子/动态/打卡</td>
+              <td>运动团/同城</td>
+              <td>无社区/纯工具</td>
+              <td>无社区定位合理，但必须用“外部社交 + 轻承接页”替代社区承接。</td>
+              <td class="cell-action">即便不做社区，仍可通过“外部传播物料 + 轻承接页”形成回流；关键在承接是否能承载“同款价值”。</td>
+              <td>外部回流率</td>
+              <td class="cell-evidence">#K5 / #B3 / #G5</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="takeaway-box">
+          <span class="takeaway-title">📝 2.2.1 对标规律提炼（可迁移原则）</span>
+          <strong>规律1（触发）：</strong>情绪峰值触发（PR/连胜/成就）明显优于“训练结束常规入口”，因为用户在“值得炫耀”的时刻更愿意分享。<br>
+          <strong>规律2（结构）：</strong>朋友圈传播的最小可读结构＝结论句 + 2-3 个大数字；明细默认折叠，避免路人信息过载。<br>
+          <strong>规律3（成本）：</strong>分享完成率取决于“一键生成默认可用”，而不是提供很多编辑能力；编辑应是可选项而非必填流程。<br>
+          <strong>规律4（隐私）：</strong>隐私保护必须“默认开启”才会提升完成率；只给开关但默认暴露，会让用户直接放弃分享。<br>
+          <strong>规律5（承接）：</strong>无社区产品要做回流，关键不是社区内容，而是“同款计划/训练方法”的<strong>轻承接页</strong> + 归因链路。
+      </div>
+    </section>
+
+    <!-- 2.4 现状诊断 -->
+    <section id="diagnosis">
+      <h2>2.4 训记分享体系现状诊断（As-Is）</h2>
+      <div class="data-table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>链路节点</th>
+              <th>现状问题</th>
+              <th>对分享/增长的影响</th>
+              <th>竞品对照（做得好是什么样）</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>触发入口</strong></td>
+              <td>缺少“高光时刻”强提示，用户靠手动截图</td>
+              <td>分享率低、且分享时机错过</td>
+              <td class="cell-action">竞品会在 PR/完赛/连胜等节点主动提示分享，减少用户手动寻找入口。</td>
+            </tr>
+            <tr>
+              <td><strong>内容可读性</strong></td>
+              <td>数据偏专业，路人无法3秒读懂</td>
+              <td>传播弱，转发意愿低</td>
+              <td class="cell-action">竞品的分享物料通常先给“结论+大数字”，细节延后/折叠，保证路人 3 秒可读。</td>
+            </tr>
+            <tr>
+              <td><strong>隐私安全感</strong></td>
+              <td>敏感项无默认保护（体重/备注/位置等）</td>
+              <td>分享顾虑大，完成率低</td>
+              <td class="cell-action">竞品对敏感字段更偏向默认隐藏或显式提示，降低用户“暴露成本”。</td>
+            </tr>
+            <tr>
+              <td><strong>回流承接</strong></td>
+              <td>缺少带参二维码/H5承接，外部流量断层</td>
+              <td>无法归因与二次触达</td>
+              <td class="cell-action">竞品会提供最小承接（二维码/小程序/落地页），让传播之后仍有回流与可量化信号。</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="focus-module" style="margin-top:16px;">
+        <div class="focus-header">
+          <span class="focus-icon">🧭</span>
+          <span class="focus-title">训记当前分享流程（问题诊断图）</span>
+        </div>
+        <div class="mermaid-block" style="border:1px solid rgba(255,255,255,0.12); border-radius:12px; background:#111; padding:14px; margin-top:12px;">
+  <div class="mermaid" style="overflow:auto; padding:8px; border-radius:10px; background:rgba(0,0,0,0.25);">
+%%{init: {"theme":"dark","securityLevel":"loose"}}%%
+graph LR
+    A[用户完成训练] --> B[手动截图训练数据页面]
+    B --> C[退出App，打开社交软件]
+    C --> D[上传图片，手动输入文字说明]
+    D --> E[分享完成]
+    E -.->|无追踪| F[无法评估效果]
+    B -.->|体验割裂| G[用户可能因步骤繁琐而放弃]
+  </div>
+  <div style="margin-top:10px; font-size:12px; color:rgba(255,255,255,0.55);">断点：体验割裂 / 无承接 / 无复盘。交互：滚轮缩放、拖拽移动。</div>
+</div>
+
+      <div class="four-part-card">
+        <div class="fpc-title">✅ 核心问题诊断总结</div>
+        <div class="fpc-grid">
+          <div class="fpc-item"><strong>一句话：</strong>训记不是没数据，而是“<span style="color:#fff;font-weight:800;">没把数据变成路人能读懂、还能回流的传播素材</span>”。</div>
+          <div class="fpc-item"><strong>差距结构：</strong>触发（缺少高光提示）→ 物料（路人不可读）→ 隐私（默认不安全）→ 承接（回流断层）。</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2.5 Gap 总结 -->
+    <section id="gap-summary">
+      <h2>2.5 Gap 总结（差距 → 竞品模式 → 指标）</h2>
+      <div class="data-table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr><th>关键差距</th><th>一句话影响</th><th>竞品对照/参考模式</th><th>可观察指标</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>缺少高光触发</strong></td>
+              <td>错过情绪峰值，分享动机衰减</td>
+              <td class="cell-action">竞品把分享入口绑定成就节点（PR/连胜/完赛），提升触发覆盖与动机强度。</td>
+              <td>触发后分享率</td>
+            </tr>
+            <tr>
+              <td><strong>分享素材不可传播</strong></td>
+              <td>路人读不懂，转发效率低</td>
+              <td class="cell-action">竞品物料以“结论句+大数字”为骨架，明细后置，保证路人可读与可转述。</td>
+              <td>预览生成率 / 分享完成率</td>
+            </tr>
+            <tr>
+              <td><strong>隐私默认不安全</strong></td>
+              <td>顾虑导致直接不分享</td>
+              <td class="cell-action">竞品对敏感字段默认保护或显式提醒，减少“担心被看见”导致的放弃。</td>
+              <td>开关使用率 / 分享完成率</td>
+            </tr>
+            <tr>
+              <td><strong>分享后无承接归因</strong></td>
+              <td>流量断层，无法复盘</td>
+              <td class="cell-action">竞品提供最小承接入口（二维码/小程序/落地页），保证传播后有回流与可度量信号。</td>
+              <td>扫码率 / 激活转化率</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 分隔符：附录开始 -->
+    <div style="margin: 60px 0; border-top: 2px dashed var(--border); text-align: center; color: var(--text-muted); padding-top: 20px;">
+        <details>
+            <summary style="cursor:pointer; font-weight:800; color:#aaa; padding:10px 0;">
+              附录（可选）：行动假设与验证设计（点击展开）
+            </summary>
+            <div style="margin-top:20px;">
+
+                <!-- 3. 用户需求 -->
+                <section id="user-analysis">
+                  <h2>附录 3. 用户需求场景（建议）</h2>
+                  <div class="data-table-wrapper">
+                    <table class="data-table">
+                      <thead>
+                        <tr><th>典型场景</th><th>用户动机</th><th>分享阻力</th><th>建议动作</th></tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td><strong>训练破PR</strong></td>
+                          <td>炫耀成就，获得认可</td>
+                          <td>截图不好看，怕暴露弱项</td>
+                          <td class="cell-action">PR高光弹窗 + 隐私开关 + PR徽章</td>
+                        </tr>
+                        <tr>
+                          <td><strong>减脂期打卡</strong></td>
+                          <td>证明自律，寻求监督</td>
+                          <td>营养记录麻烦</td>
+                          <td class="cell-action">默认展示宏量营养摘要 +（可选）照片位</td>
+                        </tr>
+                        <!-- 新增场景 -->
+                        <tr>
+                          <td><strong>计划完成/连续打卡</strong></td>
+                          <td>坚持的成就感，自我激励</td>
+                          <td>普通数据无亮点</td>
+                          <td class="cell-action">突出“连续X天”/“第X次训练”大数字</td>
+                        </tr>
+                        <tr>
+                          <td><strong>训练数据对比</strong></td>
+                          <td>展示进步，量化成果</td>
+                          <td>手动拼图麻烦</td>
+                          <td class="cell-action">一键生成“本周vs上周”/“体脂趋势”图</td>
+                        </tr>
+                        <tr>
+                          <td><strong>恢复/拉伸</strong></td>
+                          <td>轻松记录，保持活跃</td>
+                          <td>数据太少不值得发</td>
+                          <td class="cell-action">提供低信息密度、高视觉美感的轻量模板</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+
+                <!-- 4. 分享闭环 -->
+                <section id="flow-analysis">
+                  <h2>附录 4. 分享闭环链路设计（建议）</h2>
+                  <!-- 已按你的要求：不再放泳道图 -->
+                  <div class="takeaway-box" style="text-align:left;">
+                    <span class="takeaway-title">✅ 附录 4 说明</span>
+                    已移除泳道图（避免“看不全、还得拖动”的阅读负担）。如需展示闭环链路，可在面试时口述：<strong>触发 → 物料 → 分享 → 承接</strong> 四段即可。
+                  </div>
+                </section>
+
+                <!-- 5. 模块矩阵 -->
+                <section id="module-matrix">
+                  <h2>附录 5. 建议项汇总</h2>
+                  <div class="data-table-wrapper">
+                    <table class="data-table">
+                      <thead>
+                        <tr><th>模块</th><th>目的</th><th>训记改版动作</th><th>验证指标</th><th>优先级</th></tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td><strong>结论句</strong></td><td>3秒传递价值</td><td>自动生成“今日完成胸部训练...”</td><td>分享预览停留/CTR</td><td><span class="badge-p0">P0</span></td>
+                        </tr>
+                        <tr>
+                          <td><strong>大数字区</strong></td><td>视觉冲击</td><td>总容量/PR数/缺口放大</td><td>图片生成率</td><td><span class="badge-p0">P0</span></td>
+                        </tr>
+                        <tr>
+                          <td><strong>明细折叠</strong></td><td>防信息过载</td><td>默认折叠明细，提供展开</td><td>分享成功率</td><td><span class="badge-p0">P0</span></td>
+                        </tr>
+                        <tr>
+                          <td><strong>隐私开关</strong></td><td>安全感</td><td>体重/备注/位置独立开关（默认隐藏）</td><td>开关使用率</td><td><span class="badge-p0">P0</span></td>
+                        </tr>
+                        <tr>
+                          <td><strong>静态二维码</strong></td><td>闭环验证</td><td>无H5，先跑通扫码链路</td><td>扫码率</td><td><span class="badge-p1">P1</span></td>
+                        </tr>
+                        <tr>
+                          <td><strong>带参归因+H5</strong></td><td>精准归因</td><td>带参二维码+H5落地页</td><td>激活转化率</td><td><span class="badge-p1">P1</span></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+
+                <!-- 5.1 RICE 优先级排行（替换机会矩阵） -->
+                <section id="rice-ranking">
+                  <h2>附录 5.1 优先级排序（基于 RICE 模型）</h2>
+
+                  <p style="font-size:12px; color:var(--text-sub); margin-top:-10px;">
+                    RICE 用于把动作项转成可执行优先级（Top5 用于 MVP 先验证“分享率/回流”闭环）。
+                  </p>
+                  
+                  <p style="font-size:12px; color:var(--text-sub); margin-top:10px;">
+                    注：RICE 分值为方案推演用的相对估计（Reach/Impact/Confidence 取档位），用于排序而非精确预算。
+                  </p>
+
+                  <div class="focus-module" style="margin-top:16px;">
+                    <div class="focus-header">
+                      <span class="focus-icon">🧮</span>
+                      <span class="focus-title">RICE 口径</span>
+                    </div>
+                    <div style="font-size:13px; color:#ddd; line-height:1.7;">
+                      RICE = (Reach × Impact × Confidence) / Effort<br>
+                      Reach：触达范围（1-5档）；Impact：影响强度（0.5/1/2/3）；Confidence：信心（0.5/0.7/0.9）；Effort：开发成本（人周）
+                    </div>
+                  </div>
+
+                  <!-- 新图：RICE 条形排行图 -->
+                  <div class="rice-chart">
+                    <div class="rice-row">
+                      <div class="rice-name">默认隐私保护 + ≤3步开关</div>
+                      <div class="rice-bar"><span></span></div>
+                      <div class="rice-score">5.3</div>
+                    </div>
+                    <div class="rice-row">
+                      <div class="rice-name">信息层级重排（结论句+大数字+折叠明细）</div>
+                      <div class="rice-bar"><span></span></div>
+                      <div class="rice-score">4.2</div>
+                    </div>
+                    <div class="rice-row">
+                      <div class="rice-name">一键生成 & 模板A渲染性能保障</div>
+                      <div class="rice-bar"><span></span></div>
+                      <div class="rice-score">3.5</div>
+                    </div>
+                    <div class="rice-row">
+                      <div class="rice-name">渠道适配&默认文案（朋友圈/聊天/小红书）</div>
+                      <div class="rice-bar"><span></span></div>
+                      <div class="rice-score">3.2</div>
+                    </div>
+                    <div class="rice-row">
+                      <div class="rice-name">高光触发（PR/连续/总容量）+庆祝弹窗</div>
+                      <div class="rice-bar"><span></span></div>
+                      <div class="rice-score">2.9</div>
+                    </div>
+                  </div>
+
+                  <!-- 明细表：计算明细 -->
+                  <div class="data-table-wrapper table-full" style="margin-top:18px;">
+                    <table class="data-table">
+                      <thead>
+                        <tr>
+                          <th>动作项</th>
+                          <th>Reach(1-5)</th>
+                          <th>Impact</th>
+                          <th>Confidence</th>
+                          <th>Effort(人周)</th>
+                          <th>RICE</th>
+                          <th>建议优先级</th>
+                          <th>用来验证什么</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td><strong>默认隐私保护 + ≤3步开关</strong></td>
+                          <td>5</td><td>2</td><td>0.8</td><td>1.5</td>
+                          <td><strong>5.3</strong></td>
+                          <td><span class="badge-p0">P0</span></td>
+                          <td>分享完成率、开关使用率、敏感字段分布</td>
+                        </tr>
+                        <tr>
+                          <td><strong>信息层级重排（结论句+大数字+折叠明细）</strong></td>
+                          <td>5</td><td>3</td><td>0.7</td><td>2.5</td>
+                          <td><strong>4.2</strong></td>
+                          <td><span class="badge-p0">P0</span></td>
+                          <td>预览生成率、停留时长、分享CTR</td>
+                        </tr>
+                        <tr>
+                          <td><strong>一键生成 & 模板A渲染性能保障</strong></td>
+                          <td>5</td><td>2</td><td>0.7</td><td>2</td>
+                          <td><strong>3.5</strong></td>
+                          <td><span class="badge-p0">P0</span></td>
+                          <td>渲染成功率、render_time_ms、崩溃率</td>
+                        </tr>
+                        <tr>
+                          <td><strong>渠道适配&默认文案（朋友圈/聊天/小红书）</strong></td>
+                          <td>4</td><td>2</td><td>0.6</td><td>1.5</td>
+                          <td><strong>3.2</strong></td>
+                          <td><span class="badge-p0">P0</span></td>
+                          <td>渠道分布、不同渠道分享成功率</td>
+                        </tr>
+                        <tr>
+                          <td><strong>高光触发（PR/连续/总容量）+庆祝弹窗</strong></td>
+                          <td>4</td><td>3</td><td>0.6</td><td>2.5</td>
+                          <td><strong>2.9</strong></td>
+                          <td><span class="badge-p0">P0</span></td>
+                          <td>入口点击率、触发覆盖率、触发类型贡献</td>
+                        </tr>
+                        <tr>
+                          <td><strong>静态二维码回流（先跑通闭环）</strong></td>
+                          <td>3</td><td>1</td><td>0.6</td><td>1</td>
+                          <td><strong>1.8</strong></td>
+                          <td><span class="badge-p1">P1</span></td>
+                          <td>扫码率、落地页打开率（基础）</td>
+                        </tr>
+                        <tr>
+                          <td><strong>带参二维码 + H5落地页归因</strong></td>
+                          <td>3</td><td>3</td><td>0.5</td><td>4</td>
+                          <td><strong>1.1</strong></td>
+                          <td><span class="badge-p1">P1</span></td>
+                          <td>归因准确率、落地页→激活转化</td>
+                        </tr>
+                        <tr>
+                          <td><strong>模板B（传播版：餐图/宏量摘要）</strong></td>
+                          <td>3</td><td>2</td><td>0.5</td><td>3</td>
+                          <td><strong>1.0</strong></td>
+                          <td>P2</td>
+                          <td>朋友圈CTR、回流点击率变化</td>
+                        </tr>
+                        <tr>
+                          <td><strong>背景商店/复杂模板库</strong></td>
+                          <td>2</td><td>1</td><td>0.4</td><td>6</td>
+                          <td><strong>0.13</strong></td>
+                          <td>P3</td>
+                          <td>不建议早期做</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div class="four-part-card">
+                    <div class="fpc-title">🎯 RICE 结论怎么落到 Roadmap</div>
+                    <div class="fpc-grid">
+                      <div class="fpc-item"><strong>MVP（先验证分享率）：</strong>隐私默认 + 信息层级 + 一键生成/性能 + 高光触发 + 渠道适配。</div>
+                      <div class="fpc-item"><strong>V1（再验证回流）：</strong>静态二维码 → 带参二维码/H5 归因（用数据证明值不值）。</div>
+                    </div>
+                  </div>
+                </section>
+
+                <!-- 6.0 线框对比 -->
+                <section id="wireframe-compare">
+                  <h2>附录 6.0 线框对比（Before / After）</h2>
+                  <div class="data-table-wrapper">
+                    <table class="data-table">
+                      <thead>
+                        <tr>
+                          <th>模块</th>
+                          <th>Before（现状）</th>
+                          <th>After（改版）</th>
+                          <th>核心改版价值</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td><strong>分享入口</strong></td>
+                          <td>用户手动截图/找入口</td>
+                          <td class="cell-action">PR/成就触发弹窗 + 明确CTA</td>
+                          <td>分享率 ↑（时机更准）</td>
+                        </tr>
+                        <tr>
+                          <td><strong>卡片结构</strong></td>
+                          <td>信息密、路人读不懂</td>
+                          <td class="cell-action">结论句 + 2-3大数字 + 明细折叠</td>
+                          <td>传播效率 ↑（3秒读懂）</td>
+                        </tr>
+                        <tr>
+                          <td><strong>隐私</strong></td>
+                          <td>默认暴露敏感项</td>
+                          <td class="cell-action">默认隐藏 + 独立开关（≤3步）</td>
+                          <td>完成率 ↑（顾虑更低）</td>
+                        </tr>
+                        <tr>
+                          <td><strong>回流</strong></td>
+                          <td>无归因/无承接</td>
+                          <td class="cell-action">带参二维码 + 克制落地页</td>
+                          <td>闭环可量化（可复盘）</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+
+                <!-- 6. 视觉方案 -->
+                <section id="visual-design">
+                  <h2>附录 6. 视觉方案设计 (UI Mockups)</h2>
+                  
+
+                  <div class="mockup-wrapper">
+                    <!-- 方案A -->
+                    <div class="phone-col">
+                      <h3 style="color:var(--accent-highlight)">模板A：纯训练专业版</h3>
+                      <p style="font-size:12px; color:#666;">场景：教练汇报 / 训练群 / 自我记录</p>
+                      <div class="variant-label">文案备选：自律型 / 炫耀型 / 监督型</div>
+
+                      <div class="phone-frame bg-hardcore" title="点击放大" aria-label="点击放大 模板A">
+                        <div class="dynamic-island"></div>
+                        <div class="app-screen" style="background: transparent;">
+                          <div class="conclusion-bar">今日胸部训练完成<br>达成 3 项 PR 新纪录 🚀</div>
+                          <div style="padding:16px;">
+                            <div style="font-size:12px; color:#aaa; margin-top:10px;">2026.01.18 · 90min</div>
+
+                            <div class="hardcore-card" style="display:flex; justify-content:space-between; margin-top:20px;">
+                              <div class="hardcore-stat"><div class="hardcore-val">12.5t</div><div class="hardcore-lbl">总容量</div></div>
+                              <div class="hardcore-stat"><div class="hardcore-val" style="color:var(--accent-highlight)">3</div><div class="hardcore-lbl">打破PR</div></div>
+                              <div class="hardcore-stat"><div class="hardcore-val">22</div><div class="hardcore-lbl">总组数</div></div>
+                            </div>
+
+                            <!-- 隐私控制条 (New) -->
+                            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+                              <span class="meal-pill">隐藏体重 ✓</span>
+                              <span class="meal-pill">隐藏备注 ✓</span>
+                              <span class="meal-pill">隐藏位置 ✓</span>
+                            </div>
+
+                            <!-- 折叠：v8.1 修复版（不再用 hidden） -->
+                            <div style="margin-top:20px; border-top:1px solid #333; padding-top:15px;">
+                              <div class="pill-toggle" data-action="toggle" role="button" tabindex="0" aria-expanded="false">展开训练明细 ⌄</div>
+                              <div class="detail-block" aria-hidden="true">
+                                <div style="font-size:12px; color:#ccc; margin-bottom:12px; display:flex; justify-content:space-between; border-bottom:1px solid #222; padding-bottom:4px;">
+                                  <span>🏋️ 杠铃卧推</span> <span>100kg x 5 <span class="pr-badge">PR</span></span>
+                                </div>
+                                <div style="font-size:12px; color:#ccc; margin-bottom:12px; display:flex; justify-content:space-between; border-bottom:1px solid #222; padding-bottom:4px;">
+                                  <span>🦋 哑铃飞鸟</span> <span>15kg x 12</span>
+                                </div>
+                                <div style="font-size:12px; color:#ccc; margin-bottom:12px; display:flex; justify-content:space-between; border-bottom:1px solid #222; padding-bottom:4px;">
+                                  <span>⛓️ 绳索夹胸</span> <span>20kg x 15</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div style="margin-top:auto; padding:16px; background:rgba(0,0,0,0.8); display:flex; align-items:center; gap:10px;">
+                            <div style="width:30px; height:30px; background:#fff; border-radius:4px;"></div>
+                            <div style="font-size:10px; color:#aaa;">扫码查看<br>同款计划</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- 方案B -->
+                    <div class="phone-col">
+                      <h3 style="color:var(--accent-orange)">模板B：训练+减脂餐传播版</h3>
+                      <p style="font-size:12px; color:#666;">场景：教练汇报 / 训练群 / 自我记录</p>
+                      <div class="variant-label">文案备选：自律型 / 炫耀型 / 监督型</div>
+
+                      <div class="phone-frame bg-dynamic-b" title="点击放大" aria-label="点击放大 模板B">
+                        <div class="dynamic-island"></div>
+                        <div class="app-screen" style="background: transparent;">
+                          <div class="conclusion-bar orange">今日热量缺口 -350kcal<br>蛋白质摄入完美达标 🔥</div>
+
+                          <div style="padding:15px; overflow-y:auto;">
+                            <!-- 训练模块 -->
+                            <div class="b-card">
+                              <div class="b-header">
+                                <span class="b-label">今日消耗</span>
+                                <span class="b-big-num">560</span>
+                              </div>
+                              <div style="font-size:11px; color:#aaa;">胸部训练 · 90min · 12.5吨</div>
+                            </div>
+
+                            <!-- 无图状态：摘要 -->
+                            <div class="b-card" style="border-color:var(--accent-orange);">
+                              <div class="b-header">
+                                <span class="b-label" style="color:var(--accent-orange)">饮食摘要（有图示例）</span>
+                                <span class="b-big-num" style="color:var(--accent-orange);">-350</span>
+                              </div>
+
+                              <div class="macro-group">
+                                <div class="macro-item">
+                                  <div class="macro-label"><span>蛋白质 160g</span><span style="color:var(--accent-success)">达标</span></div>
+                                  <div class="macro-bar-bg"><div class="macro-bar-fill" style="width:100%; background:var(--accent-success)"></div></div>
+                                </div>
+                                <div class="macro-item">
+                                  <div class="macro-label"><span>碳水 200g</span><span>60%</span></div>
+                                  <div class="macro-bar-bg"><div class="macro-bar-fill" style="width:60%; background:#666"></div></div>
+                                </div>
+                                <div class="macro-item">
+                                  <div class="macro-label"><span>脂肪 55g</span><span>40%</span></div>
+                                  <div class="macro-bar-bg"><div class="macro-bar-fill" style="width:40%; background:#444"></div></div>
+                                </div>
+                              </div>
+                              <div style="font-size:11px; color:#4ade80; margin-top: 10px; border-top: 1px dashed #444; padding-top: 8px; line-height:1.4;">
+                                今日饮食结论：蛋白达标，碳水偏高，建议晚餐补蛋白减碳水
+                              </div>
+
+                              <!-- 真照片位 (Using data-key) -->
+                              <div class="meal-media" style="margin-top: 12px;">
+                                <img data-key="MEAL_PHOTO" src="" alt="减脂餐照片（示例）"
+                                     onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22500%22 height=%22320%22><rect width=%22100%25%22 height=%22100%25%22 fill=%22%23111111%22/><text x=%2250%25%22 y=%2250%25%22 fill=%22%23bbbbbb%22 font-size=%2220%22 font-family=%22Arial%22 text-anchor=%22middle%22 dominant-baseline=%22middle%22>无图：加载失败/用户未上传</text></svg>';"
+                                >
+                                <div class="meal-meta">
+                                  <span>午餐：鸡胸肉沙拉</span>
+                                  <span class="meal-pill">350 kcal · P30g</span>
+                                </div>
+                              </div>
+                              <!-- 隐私控制条 (New) -->
+                              <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+                                <span class="meal-pill">隐藏明细 ✓</span>
+                                <span class="meal-pill">隐藏热量 ✓</span>
+                              </div>
+                               <div style="font-size:10px;color:#666;margin-top:8px;">无图时：仅展示宏量摘要与结论；有图时：追加照片位。</div>
+                            </div>
+                          </div>
+
+                          <div style="margin-top:auto; padding:16px; text-align:center;">
+                            <div style="font-size:10px; color:#444;">训记 · 训练记录工具</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                   <!-- P2 补充：承接落地页线框 -->
+                   <div class="focus-module" style="margin-top:40px; border:1px dashed #444; background: transparent;">
+                       <div class="focus-header">
+                           <span class="focus-title" style="color:#888;">Web 落地页线框 (To-Be)</span>
+                       </div>
+                       <div style="height: 300px; background: #000; border: 1px solid #333; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+                           <div style="font-size: 20px; font-weight: bold; color: #fff; margin-bottom: 10px;">APP 推广落地页</div>
+                           <div style="font-size: 14px; color: #aaa; margin-bottom: 20px;">主卖点：查看同款训练计划</div>
+                           <div style="background: var(--accent-primary); color: #fff; padding: 10px 30px; border-radius: 8px; font-weight: bold;">下载 APP 查看详情</div>
+                           <div style="font-size: 12px; color: #666; margin-top: 15px;">预留：归因参数位（share_id / channel / campaign）</div>
+                       </div>
+                   </div>
+
+                </section>
+
+                <!-- 8. 风险与路线图 -->
+                <section id="risk-roadmap">
+                  <h2>附录 8. 风险对策与实施</h2>
+
+                  <div class="four-part-card">
+                    <div class="fpc-title">💡 四段式洞察卡</div>
+                    <div class="fpc-grid">
+                      <div class="fpc-item"><strong>现象：</strong>分享功能容易引发隐私与审美争议。</div>
+                      <div class="fpc-item"><strong>原因：</strong>敏感信息外泄、信息过载、风格不统一会降低信任。</div>
+                      <div class="fpc-item"><strong>启示：</strong>默认保护+模板规范+克制承接是底线。</div>
+                    </div>
+                    <ul class="fpc-actions">
+                      <li>1）默认隐藏敏感项（体重/备注/位置）</li>
+                      <li>2）默认简洁+折叠明细避免信息过载</li>
+                      <li>3）承接页克制表达，避免营销感</li>
+                    </ul>
+                  </div>
+
+                  <h3>8.1 实施路线图 (Roadmap)</h3>
+                  <div class="path-map" title="点击放大" aria-label="点击放大 路线图">
+                    <div class="path-node" style="--node-color: var(--accent-primary);">
+                      <div class="path-icon">1</div>
+                      <div class="path-card">
+                        <div class="path-title">
+                          MVP 验证期 (Q1)<span class="path-badge">2-3周</span>
+                          <div style="margin-top:10px; height:8px; background:#222; border-radius:999px; overflow:hidden;">
+                             <div style="height:100%; width:25%; background:var(--accent-primary);"></div>
+                          </div>
+                        </div>
+                        <div class="path-content">
+                          <ul class="path-list">
+                            <li>默认隐私保护 + ≤3步开关 (Effort: 1.5人周)</li>
+                            <li>信息层级重排 (Effort: 2.5人周)</li>
+                            <li>一键生成 & 性能保障 (Effort: 2人周)</li>
+                            <li>渠道适配 & 默认文案 (Effort: 1.5人周)</li>
+                            <li>高光触发体系 (Effort: 2.5人周)</li>
+                          </ul>
+                          <div class="path-not">不做：饮食识别 / 复杂模板 / 长图</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="path-node" style="--node-color: var(--accent-success);">
+                      <div class="path-icon">2</div>
+                      <div class="path-card">
+                        <div class="path-title">
+                           V1 增长期 (Q2)<span class="path-badge">4-6周</span>
+                           <div style="margin-top:10px; height:8px; background:#222; border-radius:999px; overflow:hidden;">
+                             <div style="height:100%; width:45%; background:var(--accent-success);"></div>
+                          </div>
+                        </div>
+                        <div class="path-content">
+                          <ul class="path-list">
+                            <li>静态二维码回流 (Effort: 1人周)</li>
+                            <li>带参二维码 + H5落地页归因 (Effort: 4人周)</li>
+                            <li>模板B（传播版）上线 (Effort: 3人周)</li>
+                          </ul>
+                          <div class="rm-gate">验收门槛：扫码率 ≥ 3%，落地页打开率 ≥ 30%</div>
+                          <div class="path-not">不做：AI视频 / 复杂背景商店</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="path-node" style="--node-color: var(--accent-secondary);">
+                      <div class="path-icon">3</div>
+                      <div class="path-card">
+                        <div class="path-title">
+                           V2 扩展期 (Q3)<span class="path-badge">8-12周</span>
+                           <div style="margin-top:10px; height:8px; background:#222; border-radius:999px; overflow:hidden;">
+                             <div style="height:100%; width:70%; background:var(--accent-secondary);"></div>
+                          </div>
+                        </div>
+                        <div class="path-content">
+                          <ul class="path-list">
+                            <li>模板库扩展（更多风格）</li>
+                            <li>智能场景推荐</li>
+                            <li>长图性能优化</li>
+                            <li>历史/收藏/复用</li>
+                          </ul>
+                          <div class="path-not">不做：任何社区化功能</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                <!-- 9. 结论复述 -->
+                <section id="delivery">
+                  <h2>9. 结论复述（Summary，非排期稿）</h2>
+
+                  <h3>9.1 结论</h3>
+                  <ul>
+                    <li>训记无社区定位合理，但必须用“分享模板 + 轻承接回流”替代社区承接，形成增长闭环。</li>
+                    <li>分享卡必须满足“3秒读懂”：结论句 + 2-3 个大数字为主，明细默认折叠。</li>
+                    <li>双模板分层能同时满足专业用户与朋友圈传播。</li>
+                    <li>低编辑成本与隐私默认保护是分享功能的前置条件。</li>
+                  </ul>
+
+                  <h3>9.2 Top5 差距对应的验证优先级（可选）</h3>
+                  <ol>
+                    <li><strong>默认隐私保护 + 开关≤3步</strong>（RICE 5.3 / Effort: 1.5人周）</li>
+                    <li><strong>信息层级重排</strong>（RICE 4.2 / Effort: 2.5人周）</li>
+                    <li><strong>一键生成 & 性能保障</strong>（RICE 3.5 / Effort: 2人周）</li>
+                    <li><strong>渠道适配&默认文案</strong>（RICE 3.2 / Effort: 1.5人周）</li>
+                    <li><strong>高光触发体系</strong>（RICE 2.9 / Effort: 2.5人周）</li>
+                  </ol>
+
+                  <h3>9.3 两方案对比表</h3>
+                  <div class="data-table-wrapper">
+                    <table class="data-table">
+                      <thead>
+                        <tr><th>对比维度</th><th>模板A：纯训练专业版</th><th>模板B：训练+减脂餐传播版</th></tr>
+                      </thead>
+                      <tbody>
+                        <tr><td>核心场景</td><td>教练汇报/训练群/自我记录</td><td>朋友圈/生活打卡/轻分享</td></tr>
+                        <tr><td>可读性</td><td>专业读者友好</td><td>路人也能3秒读懂</td></tr>
+                        <tr><td>内容结构</td><td>结论句+大数字+训练明细（可折叠）</td><td>结论句+大数字+饮食摘要（有图/无图）+明细折叠</td></tr>
+                        <tr><td>编辑成本</td><td>低（模板+开关）</td><td>中（但默认0编辑可分享）</td></tr>
+                        <tr><td>隐私风险</td><td>中（默认隐藏明细/备注）</td><td>高（默认隐藏体重/备注/位置）</td></tr>
+                        <tr><td>增长贡献假设</td><td>主要提升分享率</td><td>更可能提升回流CTR与下载转化</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+            
+            </div> <!-- End of Appendix Details Wrapper -->
+        </details>
+    </div> <!-- End of Appendix Container -->
+    
+    <footer style="margin:60px 0 20px; padding:16px 18px; border:1px solid rgba(255,255,255,0.12); border-radius:12px; background:rgba(255,255,255,0.03); color:#a3a3a3; font-size:12px; line-height:1.6;">
+      <strong style="color:#fff;">素材来源 / 版权声明</strong><br>
+      App 图标来源：应用商店 / 应用宝（仅用于学习展示，不用于商业传播）<br>
+      餐图来源：Pexels（示例图，仅用于作品集展示）
+    </footer>
+
+  </main>
+</div>
+
+<!-- Mermaid 渲染 -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<!-- SVG 缩放拖拽（让 Mermaid 可交互） -->
+<script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
+
+<script>
+  function enableMermaidPanZoom(scope = document, force = false) {
+    scope.querySelectorAll('.mermaid svg').forEach(svg => {
+      if (svg.dataset.panzoom === '1') return;
+      
+      const block = svg.closest('.mermaid-block');
+      if (!force && block && block.classList.contains('mermaid-fit')) return; // ✅ 页面跳过紧凑版
+
+      try {
+        const inst = svgPanZoom(svg, {
+          zoomEnabled: true,
+          controlIconsEnabled: false,
+          fit: true,
+          center: true,
+          minZoom: 0.5,
+          maxZoom: 12,
+          dblClickZoomEnabled: true,
+          mouseWheelZoomEnabled: true
+        });
+        inst.fit(); 
+        inst.center();
+        svg.dataset.panzoom = '1';
+      } catch (e) {}
+    });
+  }
+
+  async function renderMermaidAll(scope = document) {
+    if (!window.mermaid) return;
+    mermaid.initialize({ startOnLoad: false, theme: 'dark', securityLevel: 'loose' });
+    await mermaid.run({ querySelector: '.mermaid' });
+    enableMermaidPanZoom(scope);
+  }
+
+  window.addEventListener('DOMContentLoaded', () => renderMermaidAll(document));
+
+// ===== START Main Script Block =====
+
+// ===== 远程图片资产（可随时替换）=====
+const IMG = {
+  // ✅ 咕咚图标
+  GUDONG_ICON: "https://pp.myapp.com/ma_icon/0/icon_3306_1768210392/256",
+  
+  // ✅ 薄荷健康（应用宝图标 CDN）
+  BOHE_ICON: "https://pp.myapp.com/ma_icon/0/icon_84129_1732595651/256",
+
+  // 占位符：用户需替换为真实链接 (使用Placeholder服务作为Fallback)
+  KEEP_ICON: "assets/icon_keep.png", 
+  XUNJI_ICON: "assets/icon_xunji.png", 
+
+  // ✅ 真实减脂餐图
+  MEAL_PHOTO:  "assets/meal.jpg",
+
+  // 新增流图 (Placeholder for stability)
+  FLOW_XUNJI_ASIS: "assets/flow_xunji_asis.png",
+  FLOW_COMP_SWIMLANE: "assets/flow_comp_swimlane.png",
+};
+
+// 0.3 自动填充图片 (封装为函数以便复用)
+function fillImages(scope = document) {
+  scope.querySelectorAll('img[data-key]').forEach(img => {
+    const key = img.getAttribute('data-key');
+    if (IMG[key] && !IMG[key].includes('PASTE_')) {
+       img.src = IMG[key];
+    }
+  });
+}
+
+// 首次调用
+fillImages(document);
+
+  // 1) Intersection Observer: Updated to handle all nav items
+  const sections = document.querySelectorAll('main section');
+  
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        // Remove active class from ALL nav items
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        
+        const id = entry.target.id;
+        // Select ALL matching links (both desktop and mobile)
+        const activeLinks = document.querySelectorAll(`.nav-item[href="#${id}"]`);
+        activeLinks.forEach(link => link.classList.add('active'));
+      }
+    });
+  }, { rootMargin: '-20% 0px -60% 0px', threshold: 0 });
+
+  sections.forEach(section => observer.observe(section));
+
+  // 2) Sidebar Search
+  const navSearch = document.getElementById('navSearch');
+  navSearch.addEventListener('input', (e) => {
+    const val = e.target.value.toLowerCase().trim();
+    document.querySelectorAll('.nav-item').forEach(item => {
+      const text = item.textContent.toLowerCase();
+      if (!val || text.includes(val)) item.classList.remove('hidden');
+      else item.classList.add('hidden');
+    });
+  });
+
+  // 3) Fold/Unfold Details
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.pill-toggle');
+    if (btn) toggleDetails(btn);
+  });
+
+  function toggleDetails(btn) {
+    const detailBlock = btn.nextElementSibling;
+    btn.classList.toggle('active');
+
+    const isOpen = detailBlock.classList.toggle('open');
+    if (isOpen) {
+      btn.innerText = '收起训练明细 ⌃';
+    } else {
+      btn.innerText = '展开训练明细 ⌄';
+    }
+    btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    detailBlock.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+  }
+
+  document.addEventListener('keydown', (e) => {
+    const btn = document.activeElement?.closest?.('.pill-toggle');
+    if (!btn) return;
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      toggleDetails(btn);
+    }
+  });
+
+  // 4) Lightbox
+  const lb = document.getElementById('lightbox');
+  const lbContent = document.getElementById('lightbox-content');
+  const lbClose = document.getElementById('lightbox-close');
+
+  lbClose.addEventListener('click', (e) => { e.stopPropagation(); lb.classList.remove('active'); });
+  lb.addEventListener('click', () => lb.classList.remove('active'));
+  lbContent.addEventListener('click', (e) => e.stopPropagation());
+
+  // Lightbox Zoom Logic
+  lbContent.addEventListener('wheel', (e) => {
+    // Check if the event target is inside a Mermaid SVG, if so, let SVG pan/zoom handle it
+    if (e.target.closest && e.target.closest('.mermaid')) return; 
+    
+    e.preventDefault();
+    const target = lbContent.firstElementChild;
+    if (!target) return;
+
+    const currentScale = parseFloat(target.getAttribute('data-scale') || '1');
+    const next = e.deltaY < 0 ? currentScale + 0.1 : currentScale - 0.1;
+    const newScale = Math.min(3, Math.max(0.6, next));
+
+    target.style.transform = `scale(${newScale})`;
+    target.style.transformOrigin = 'center';
+    target.setAttribute('data-scale', String(newScale));
+  }, { passive: false });
+
+  document.querySelectorAll('.quadrant-container, .phone-frame, .flow-container, .path-map, .funnel-container, .rice-chart, .img-card, .mermaid-block').forEach(el => {
+    el.style.cursor = 'zoom-in';
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      lbContent.innerHTML = '';
+      const clone = el.cloneNode(true);
+
+      clone.style.margin = '0';
+      clone.style.cursor = 'default';
+      clone.style.transform = 'none';
+      clone.removeAttribute('title');
+      clone.removeAttribute('aria-label');
+      
+      // Cleanup ID/onclick in clone to avoid duplicates
+      clone.querySelectorAll('[id]').forEach(n => n.removeAttribute('id'));
+      clone.querySelectorAll('[onclick]').forEach(n => n.removeAttribute('onclick'));
+
+      clone.setAttribute('data-scale','1');
+      clone.style.transform = 'scale(1)';
+      clone.style.transformOrigin = 'center';
+
+      if (clone.classList.contains('phone-frame')) {
+        clone.style.transform = 'scale(1.25)';
+        clone.setAttribute('data-scale','1.25');
+      } else if (clone.classList.contains('quadrant-container')) {
+        clone.style.width = '90vw';
+        clone.style.height = '70vh';
+      } else if (clone.classList.contains('path-map')) {
+        clone.style.padding = '40px';
+        clone.style.backgroundColor = '#111';
+        clone.style.width = '80vw';
+      } else if (clone.classList.contains('rice-chart')) {
+        clone.style.width = '85vw';
+      }
+
+      lbContent.style.transform = 'scale(1)';
+      lbContent.appendChild(clone);
+      
+      // Re-run image fill for clone context
+      fillImages(clone);
+      enableMermaidPanZoom(clone, true); // Enable pan/zoom on clone
+      
+      lb.classList.add('active');
+    });
+  });
+
+  // 5) Roadmap Scroll Reveal
+  const pathNodes = document.querySelectorAll('.path-node');
+  const pathObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) entry.target.classList.add('visible');
+    });
+  }, { threshold: 0.2 });
+
+  pathNodes.forEach(node => pathObserver.observe(node));
+
+  // 6) Table Sorting (with Chinese locale support)
+  window.sortTable = function(n) {
+    const table = document.getElementById("benchmarkTable");
+    if (!table) return;
+
+    let switching = true;
+    let dir = table.getAttribute('data-sort-dir') === 'asc' ? 'desc' : 'asc';
+    table.setAttribute('data-sort-dir', dir);
+
+    while (switching) {
+      switching = false;
+      const rows = table.rows;
+      for (let i = 1; i < (rows.length - 1); i++) {
+        let shouldSwitch = false;
+        const x = rows[i].getElementsByTagName("TD")[n];
+        const y = rows[i + 1].getElementsByTagName("TD")[n];
+
+        const xVal = (x ? x.textContent : '').toLowerCase();
+        const yVal = (y ? y.textContent : '').toLowerCase();
+        
+        // Use localeCompare for correct Chinese sorting
+        const cmp = xVal.localeCompare(yVal, 'zh');
+
+        if (dir === "asc" && cmp > 0) shouldSwitch = true;
+        if (dir === "desc" && cmp < 0) shouldSwitch = true;
+
+        if (shouldSwitch) {
+          rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+          switching = true;
+          break;
+        }
+      }
+    }
+  }
+
+  // 7) Auto scale RICE bar width by score (avoid manual % mismatch)
+  (function autoScaleRiceBars(){
+    const rows = document.querySelectorAll('.rice-chart .rice-row');
+    if (!rows.length) return;
+    const scores = Array.from(rows).map(r => parseFloat(r.querySelector('.rice-score')?.textContent || '0'));
+    const max = Math.max(...scores, 1);
+    rows.forEach((r, i) => {
+      const s = scores[i];
+      const bar = r.querySelector('.rice-bar span');
+      if (bar) bar.style.width = `${(s / max) * 100}%`;
+    });
+  })();
+
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') lb.classList.remove('active'); });
+  
+  // 8) Print Button Logic (Wait for images)
+  document.querySelector('button[onclick="window.print()"]')?.replaceWith(
+    (function(){
+      const btn = document.createElement('button');
+      btn.style.cssText = "width:100%; padding:12px; background:var(--accent-primary); border:none; border-radius:10px; color:#fff; font-weight:700; cursor:pointer; transition: opacity 0.2s;";
+      btn.textContent = "打印/导出 PDF (建议Chrome)";
+      btn.onclick = async () => {
+         await renderMermaidAll(document); // Mandatory: Render before printing
+         const imgs = Array.from(document.images || []);
+         await Promise.allSettled(imgs.map(img => {
+             if (img.complete) return Promise.resolve();
+             return new Promise(res => {
+                 img.onload = () => res();
+                 img.onerror = () => res();
+             });
+         }));
+         window.print();
+      };
+      return btn;
+    })()
+  );
+</script>
+
+</body>
+</html>
+                </section>
+
+            </div>
+        </details>
+    </div>
+
+    <footer style="margin:60px 0 20px; padding:16px 18px; border:1px solid rgba(255,255,255,0.12); border-radius:12px; background:rgba(255,255,255,0.03); color:#a3a3a3; font-size:12px; line-height:1.6;">
+      <strong style="color:#fff;">素材来源 / 版权声明</strong><br>
+      App 图标来源：应用商店 / 应用宝（仅用于学习展示，不用于商业传播）<br>
+      餐图来源：Pexels（示例图，仅用于作品集展示）
+    </footer>
+
+  </main>
+</div>
+
+<!-- Mermaid 渲染 -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<!-- SVG 缩放拖拽（让 Mermaid 可交互） -->
+<script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
+
+<script>
+  function enableMermaidPanZoom(scope = document, force = false) {
+    scope.querySelectorAll('.mermaid svg').forEach(svg => {
+      if (svg.dataset.panzoom === '1') return;
+      
+      const block = svg.closest('.mermaid-block');
+      if (!force && block && block.classList.contains('mermaid-fit')) return; // ✅ 页面跳过紧凑版
+
+      try {
+        const inst = svgPanZoom(svg, {
+          zoomEnabled: true,
+          controlIconsEnabled: false,
+          fit: true,
+          center: true,
+          minZoom: 0.5,
+          maxZoom: 12,
+          dblClickZoomEnabled: true,
+          mouseWheelZoomEnabled: true
+        });
+        inst.fit(); 
+        inst.center();
+        svg.dataset.panzoom = '1';
+      } catch (e) {}
+    });
+  }
+
+  async function renderMermaidAll(scope = document) {
+    if (!window.mermaid) return;
+    mermaid.initialize({ startOnLoad: false, theme: 'dark', securityLevel: 'loose' });
+    await mermaid.run({ querySelector: '.mermaid' });
+    enableMermaidPanZoom(scope);
+  }
+
+  window.addEventListener('DOMContentLoaded', () => renderMermaidAll(document));
+
+// ===== START Main Script Block =====
+
+// ===== 远程图片资产（可随时替换）=====
+const IMG = {
+  // ✅ 咕咚图标
+  GUDONG_ICON: "https://pp.myapp.com/ma_icon/0/icon_3306_1768210392/256",
+  
+  // ✅ 薄荷健康（应用宝图标 CDN）
+  BOHE_ICON: "https://pp.myapp.com/ma_icon/0/icon_84129_1732595651/256",
+
+  // 本地资源
+  KEEP_ICON: "assets/icon_keep.png", 
+  XUNJI_ICON: "assets/icon_xunji.png", 
+
+  // 本地餐图
+  MEAL_PHOTO:  "assets/meal.jpg",
+
+  // 占位（可删）
+  FLOW_XUNJI_ASIS: "assets/flow_xunji_asis.png",
+  FLOW_COMP_SWIMLANE: "assets/flow_comp_swimlane.png",
+};
+
+// 0.3 自动填充图片 (封装为函数以便复用)
+function fillImages(scope = document) {
+  scope.querySelectorAll('img[data-key]').forEach(img => {
+    const key = img.getAttribute('data-key');
+    if (IMG[key] && !IMG[key].includes('PASTE_')) {
+       img.src = IMG[key];
+    }
+  });
+}
+
+// 首次调用
+fillImages(document);
+
+  // 1) Intersection Observer: Updated to handle all nav items
+  const sections = document.querySelectorAll('main section');
+  
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        // Remove active class from ALL nav items
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        
+        const id = entry.target.id;
+        // Select ALL matching links (both desktop and mobile)
+        const activeLinks = document.querySelectorAll(`.nav-item[href="#${id}"]`);
+        activeLinks.forEach(link => link.classList.add('active'));
+      }
+    });
+  }, { rootMargin: '-20% 0px -60% 0px', threshold: 0 });
+
+  sections.forEach(section => observer.observe(section));
+
+  // 2) Sidebar Search
+  const navSearch = document.getElementById('navSearch');
+  navSearch.addEventListener('input', (e) => {
+    const val = e.target.value.toLowerCase().trim();
+    document.querySelectorAll('.nav-item').forEach(item => {
+      const text = item.textContent.toLowerCase();
+      if (!val || text.includes(val)) item.classList.remove('hidden');
+      else item.classList.add('hidden');
+    });
+  });
+
+  // 3) Fold/Unfold Details
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.pill-toggle');
+    if (btn) toggleDetails(btn);
+  });
+
+  function toggleDetails(btn) {
+    const detailBlock = btn.nextElementSibling;
+    btn.classList.toggle('active');
+
+    const isOpen = detailBlock.classList.toggle('open');
+    if (isOpen) {
+      btn.innerText = '收起训练明细 ⌃';
+    } else {
+      btn.innerText = '展开训练明细 ⌄';
+    }
+    btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    detailBlock.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+  }
+
+  document.addEventListener('keydown', (e) => {
+    const btn = document.activeElement?.closest?.('.pill-toggle');
+    if (!btn) return;
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      toggleDetails(btn);
+    }
+  });
+
+  // 4) Lightbox
+  const lb = document.getElementById('lightbox');
+  const lbContent = document.getElementById('lightbox-content');
+  const lbClose = document.getElementById('lightbox-close');
+
+  lbClose.addEventListener('click', (e) => { e.stopPropagation(); lb.classList.remove('active'); });
+  lb.addEventListener('click', () => lb.classList.remove('active'));
+  lbContent.addEventListener('click', (e) => e.stopPropagation());
+
+  // Lightbox Zoom Logic
+  lbContent.addEventListener('wheel', (e) => {
+    // Check if the event target is inside a Mermaid SVG, if so, let SVG pan/zoom handle it
+    if (e.target.closest && e.target.closest('.mermaid')) return; 
+    
+    e.preventDefault();
+    const target = lbContent.firstElementChild;
+    if (!target) return;
+
+    const currentScale = parseFloat(target.getAttribute('data-scale') || '1');
+    const next = e.deltaY < 0 ? currentScale + 0.1 : currentScale - 0.1;
+    const newScale = Math.min(3, Math.max(0.6, next));
+
+    target.style.transform = `scale(${newScale})`;
+    target.style.transformOrigin = 'center';
+    target.setAttribute('data-scale', String(newScale));
+  }, { passive: false });
+
+  document.querySelectorAll('.quadrant-container, .phone-frame, .flow-container, .path-map, .funnel-container, .rice-chart, .img-card, .mermaid-block').forEach(el => {
+    el.style.cursor = 'zoom-in';
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      lbContent.innerHTML = '';
+      const clone = el.cloneNode(true);
+
+      clone.style.margin = '0';
+      clone.style.cursor = 'default';
+      clone.style.transform = 'none';
+      clone.removeAttribute('title');
+      clone.removeAttribute('aria-label');
+      
+      // Cleanup ID/onclick in clone to avoid duplicates
+      clone.querySelectorAll('[id]').forEach(n => n.removeAttribute('id'));
+      clone.querySelectorAll('[onclick]').forEach(n => n.removeAttribute('onclick'));
+
+      clone.setAttribute('data-scale','1');
+      clone.style.transform = 'scale(1)';
+      clone.style.transformOrigin = 'center';
+
+      if (clone.classList.contains('phone-frame')) {
+        clone.style.transform = 'scale(1.25)';
+        clone.setAttribute('data-scale','1.25');
+      } else if (clone.classList.contains('quadrant-container')) {
+        clone.style.width = '90vw';
+        clone.style.height = '70vh';
+      } else if (clone.classList.contains('path-map')) {
+        clone.style.padding = '40px';
+        clone.style.backgroundColor = '#111';
+        clone.style.width = '80vw';
+      } else if (clone.classList.contains('rice-chart')) {
+        clone.style.width = '85vw';
+      }
+
+      lbContent.style.transform = 'scale(1)';
+      lbContent.appendChild(clone);
+      
+      // Re-run image fill for clone context
+      fillImages(clone);
+      enableMermaidPanZoom(clone, true); // Enable pan/zoom on clone
+      
+      lb.classList.add('active');
+    });
+  });
+
+  // 5) Roadmap Scroll Reveal
+  const pathNodes = document.querySelectorAll('.path-node');
+  const pathObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) entry.target.classList.add('visible');
+    });
+  }, { threshold: 0.2 });
+
+  pathNodes.forEach(node => pathObserver.observe(node));
+
+  // 6) Table Sorting (with Chinese locale support)
+  window.sortTable = function(n) {
+    const table = document.getElementById("benchmarkTable");
+    if (!table) return;
+
+    let switching = true;
+    let dir = table.getAttribute('data-sort-dir') === 'asc' ? 'desc' : 'asc';
+    table.setAttribute('data-sort-dir', dir);
+
+    while (switching) {
+      switching = false;
+      const rows = table.rows;
+      for (let i = 1; i < (rows.length - 1); i++) {
+        let shouldSwitch = false;
+        const x = rows[i].getElementsByTagName("TD")[n];
+        const y = rows[i + 1].getElementsByTagName("TD")[n];
+
+        const xVal = (x ? x.textContent : '').toLowerCase();
+        const yVal = (y ? y.textContent : '').toLowerCase();
+        
+        // Use localeCompare for correct Chinese sorting
+        const cmp = xVal.localeCompare(yVal, 'zh');
+
+        if (dir === "asc" && cmp > 0) shouldSwitch = true;
+        if (dir === "desc" && cmp < 0) shouldSwitch = true;
+
+        if (shouldSwitch) {
+          rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+          switching = true;
+          break;
+        }
+      }
+    }
+  }
+
+  // 7) Auto scale RICE bar width by score (avoid manual % mismatch)
+  (function autoScaleRiceBars(){
+    const rows = document.querySelectorAll('.rice-chart .rice-row');
+    if (!rows.length) return;
+    const scores = Array.from(rows).map(r => parseFloat(r.querySelector('.rice-score')?.textContent || '0'));
+    const max = Math.max(...scores, 1);
+    rows.forEach((r, i) => {
+      const s = scores[i];
+      const bar = r.querySelector('.rice-bar span');
+      if (bar) bar.style.width = `${(s / max) * 100}%`;
+    });
+  })();
+
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') lb.classList.remove('active'); });
+  
+  // 8) Print Button Logic (Wait for images)
+  document.querySelector('button[onclick="window.print()"]')?.replaceWith(
+    (function(){
+      const btn = document.createElement('button');
+      btn.style.cssText = "width:100%; padding:12px; background:var(--accent-primary); border:none; border-radius:10px; color:#fff; font-weight:700; cursor:pointer; transition: opacity 0.2s;";
+      btn.textContent = "打印/导出 PDF (建议Chrome)";
+      btn.onclick = async () => {
+         await renderMermaidAll(document); // Mandatory: Render before printing
+         const imgs = Array.from(document.images || []);
+         await Promise.allSettled(imgs.map(img => {
+             if (img.complete) return Promise.resolve();
+             return new Promise(res => {
+                 img.onload = () => res();
+                 img.onerror = () => res();
+             });
+         }));
+         window.print();
+      };
+      return btn;
+    })()
+  );
+</script>
+
+</body>
+</html>
